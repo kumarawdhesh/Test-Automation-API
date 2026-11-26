@@ -11,7 +11,7 @@ npm install
 npm start
 ```
 
-Open <http://localhost:1234>. Local demo mode is enabled by `VITE_DEMO_MODE=true` in `.env`. It is only active in Vite development mode; production builds always use the configured API. Demo data is loaded from `src/assets/json/demo-data.json`. Changes made in the UI are simulated in browser memory and reset on refresh.
+Open <http://localhost:1234>. The local UI uses demo sign-in (`VITE_DEMO_MODE=true`) and sends API requests to the Django backend (`VITE_LOCAL_API_MODE=true`, `VITE_API_BASE_URL=http://127.0.0.1:8000/api`). Both modes are development-only. Set `VITE_LOCAL_API_MODE=false` to use the browser-only fixture API instead. Demo data is loaded from `src/assets/json/demo-data.json`.
 
 ## Build and tests
 
@@ -36,10 +36,11 @@ backend\.venv\Scripts\python backend\manage.py seed_demo
 backend\.venv\Scripts\python backend\manage.py runserver 127.0.0.1:8000
 ```
 
-In another PowerShell window, run the UI against Django instead of its in-memory demo:
+In another PowerShell window, run the UI against Django. The checked-in `.env` and `.env.dev` already configure this; the explicit settings below are useful when overriding them:
 
 ```powershell
-$env:VITE_DEMO_MODE = "false"
+$env:VITE_DEMO_MODE = "true"
+$env:VITE_LOCAL_API_MODE = "true"
 $env:VITE_API_BASE_URL = "http://127.0.0.1:8000/api"
 npm run start:dev
 ```

@@ -60,6 +60,37 @@ class DemoOperationsApiTests(TestCase):
                 self.assertIn(key, response.json()[envelope])
                 self.assertTrue(response.json()[envelope][key])
 
+    def test_ui_legacy_resource_urls(self):
+        requests = [
+            ("/api/test-release", "list-releases"),
+            ("/api/test-cycle", "list-test-cycles"),
+            ("/api/test-case", "list-test-cases"),
+            ("/api/test-suite", "get-suite-cases"),
+            ("/api/dashboard-operations", "get_dashboard_stats"),
+            ("/api/execute-operations", "execute"),
+            ("/api/scheduler-operations", "scheduler"),
+        ]
+        for path, action in requests:
+            with self.subTest(path=path):
+                response = self.client.post(
+                    path,
+                    {"function_name": action},
+                    format="json",
+                    HTTP_ORIGIN="http://localhost:1234",
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response["Access-Control-Allow-Origin"], "*")
+
+    def test_ui_text_plain_json_requests_are_accepted(self):
+        response = self.client.post(
+            "/api/test-case",
+            data=json.dumps({"function_name": "list-test-cases"}),
+            content_type="text/plain",
+            HTTP_ORIGIN="http://localhost:1234",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(len(response.json()["body"]["test_cases"]), 0)
+
     def test_guardian_connection_lookup(self):
         response = self.client.get(
             "/api/guardian-connections/?operation=fetch_connection_names&appName=Falcon_Dev"

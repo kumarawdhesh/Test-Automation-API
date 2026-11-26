@@ -5,12 +5,12 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/query";
 import { getDataFromStorage,clearAllDataFromStorage } from "../utils/utility";
 import { FALCON_API } from "../../environment";
 import { demoApiResult } from "../api/demoApi";
-import { DEMO_MODE } from "../../environment";
+import { DEMO_MODE, LOCAL_API_MODE } from "../../environment";
 
 const customBaseQuery = fetchBaseQuery({ baseUrl: FALCON_API });
 // Create a custom base query function that adds authorization headers
 const baseQueryWithAuthorizationFn = async (args, api, extraOptions) => {
-  if (DEMO_MODE) {
+  if (DEMO_MODE && !LOCAL_API_MODE) {
     return demoApiResult(args);
   }
 

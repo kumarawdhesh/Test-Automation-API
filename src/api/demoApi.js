@@ -1,5 +1,5 @@
 import fixtureData from "../assets/json/demo-data.json";
-import { DEMO_MODE } from "../../environment";
+import { DEMO_MODE, LOCAL_API_MODE } from "../../environment";
 import * as XLSX from "xlsx";
 
 const clone = (value) => JSON.parse(JSON.stringify(value));
@@ -251,7 +251,7 @@ export function demoApiResult(args) {
 }
 
 export function installDemoFetch(falconApi, guardianApi) {
-  if (!DEMO_MODE || globalThis.__iLinkDemoFetchInstalled) return;
+  if (!DEMO_MODE || LOCAL_API_MODE || globalThis.__iLinkDemoFetchInstalled) return;
 
   const originalFetch = globalThis.fetch.bind(globalThis);
   globalThis.fetch = async (input, init = {}) => {

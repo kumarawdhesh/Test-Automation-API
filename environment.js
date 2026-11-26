@@ -63,6 +63,7 @@ const configuredApiBaseUrl = import.meta.env.VITE_API_BASE_URL;
 export const FALCON_API = configuredApiBaseUrl
     ? configuredApiBaseUrl.replace(/\/+$/, "")
     : FALCON_API_LOCAL;
+export const LOCAL_API_MODE = import.meta.env.DEV && import.meta.env.VITE_LOCAL_API_MODE === "true";
 export const GUARDIAN_API = import.meta.env.VITE_GUARDIAN_API_URL
     || (configuredApiBaseUrl
         ? `${FALCON_API}/guardian-connections?operation=fetch_connection_names&appName=Falcon_Dev`

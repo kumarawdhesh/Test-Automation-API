@@ -3,6 +3,7 @@ from copy import deepcopy
 from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
+from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -384,7 +385,13 @@ def operation_result(action, body):
     return None
 
 
+class LegacyJSONParser(JSONParser):
+    media_type = "text/plain"
+
+
 class OperationView(APIView):
+    parser_classes = [JSONParser, LegacyJSONParser]
+
     def get(self, request, resource=""):
         return self.handle(request, resource)
 
