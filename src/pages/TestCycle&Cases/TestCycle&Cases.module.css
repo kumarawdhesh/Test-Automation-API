@@ -1,0 +1,67 @@
+.status {
+  color: white;
+  border-radius: 43px;
+  padding: 5px 16px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 12px;
+  font-family: arial;
+  width: 117px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 11px;
+}
+
+.btn {
+  background-color: #0ea5e9 !important;
+  color: #fff !important;
+}
+
+.btn:hover {
+  background-color: #0ea5e9 !important;
+}
+
+.header {
+  background-color: #d8d8d8 !important;
+}
+
+.root {
+  margin: 0 15px;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px !important;
+}
+
+.testsuite-Header {
+  background-color: #323232;
+  margin: 0 !important;
+  padding: 10px;
+  color: white;
+}
+
+.testsuite-headercontent {
+  text-align: center;
+  color: white;
+  font-size: 14px !important;
+}
+
+input[type="checkbox"] {
+  accent-color: #39a900;
+}
+
+.accordion__content {
+  background-color: white;
+}
+
+.formControl {
+  /* margin-right: 4 !important; */
+  margin: 5 !important;
+  width: 100%;
+  text-align: left;
+}

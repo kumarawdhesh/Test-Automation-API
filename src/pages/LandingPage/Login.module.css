@@ -1,0 +1,50 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* height: 70%; */
+  background-color:#CBD5E1;
+  position: relative;
+  /* padding-top: 30px; */
+  padding-bottom: 60px;
+
+}
+.paper {
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.partFull{
+  height: 600px;
+  /* background-color: white; */
+  display:flex;
+  flex-direction: row;
+  width: 750px;
+  position: relative;
+  top: 0px;
+
+
+}
+.partA {
+  background-color: rgb(230, 236, 243);
+  width: 40%;
+}
+
+
+.loginButton {
+  color: white !important;
+}
+
+.links {
+  margin-top: 20px !important;
+  text-align: center;
+  display: flex;
+}
+
+.alink {
+  text-decoration: none;
+  padding: 0 10px;
+}

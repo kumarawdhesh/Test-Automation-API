@@ -1,0 +1,118 @@
+import json
+from pathlib import Path
+
+from django.core.management import call_command
+from django.test import TestCase
+from rest_framework.test import APIClient
+
+from .models import Release, TestCase as TestCaseModel, TestCycle, TestSuite
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+FIXTURE_PATH = PROJECT_ROOT / "src" / "assets" / "json" / "demo-data.json"
+
+
+class DemoOperationsApiTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        call_command("seed_demo", fixture=str(FIXTURE_PATH), verbosity=0)
+
+    def setUp(self):
+        self.client = APIClient()
+
+    def post_action(self, action, **payload):
+        return self.client.post(
+            "/api/operations/",
+            {"function_name": action, **payload},
+            format="json",
+        )
+
+    def test_health_and_unknown_operation(self):
+        self.assertEqual(self.client.get("/api/health/").status_code, 200)
+        response = self.post_action("not-a-real-action")
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.json()["statusCode"], 404)
+
+    def test_all_fixture_api_actions_have_json_responses(self):
+        with FIXTURE_PATH.open(encoding="utf-8") as fixture_file:
+            fixture = json.load(fixture_file)
+        actions = sorted(fixture["apiResponses"])
+        failures = []
+        for action in actions:
+            response = self.post_action(action)
+            if response.status_code != 200 or not isinstance(response.json(), dict):
+                failures.append("{}: {}".format(action, response.status_code))
+        self.assertEqual(failures, [])
+
+    def test_core_read_endpoints_match_ui_response_envelopes(self):
+        cases = {
+            "list-releases": ("data", "releases"),
+            "list-test-cycles": ("body", "test_cycles"),
+            "list-test-cases": ("body", "test_cases"),
+            "get-suite-cases": ("body", "data"),
+            "get-release-testcycles": ("data", "test_cycles"),
+            "get-executions": ("data", "test_cycle_executions"),
+        }
+        for action, (envelope, key) in cases.items():
+            with self.subTest(action=action):
+                response = self.post_action(action)
+                self.assertEqual(response.status_code, 200)
+                self.assertIn(key, response.json()[envelope])
+                self.assertTrue(response.json()[envelope][key])
+
+    def test_guardian_connection_lookup(self):
+        response = self.client.get(
+            "/api/guardian-connections/?operation=fetch_connection_names&appName=Falcon_Dev"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("PostgreSQL", response.json()["connection_name"])
+
+    def test_suite_create_update_and_delete(self):
+        self.assertEqual(self.post_action("test-suite-create", test_suite_name="API suite").status_code, 200)
+        suite = TestSuite.objects.get(name="API suite")
+        self.assertEqual(
+            self.post_action("test-suite-modify", test_suite_id=suite.id, test_suite_name="Updated suite").status_code,
+            200,
+        )
+        suite.refresh_from_db()
+        self.assertEqual(suite.name, "Updated suite")
+        self.assertEqual(self.post_action("test-suite-delete", test_suite_id=suite.id).status_code, 200)
+        self.assertFalse(TestSuite.objects.filter(id=suite.id).exists())
+
+    def test_release_and_cycle_create_then_delete(self):
+        self.assertEqual(self.post_action("release-create", release_name="API release").status_code, 200)
+        release = Release.objects.get(name="API release")
+        self.assertEqual(
+            self.post_action(
+                "test-cycle-create",
+                test_cycle_name="API cycle",
+                release_ids=[release.id],
+                test_cases=[],
+            ).status_code,
+            200,
+        )
+        cycle = TestCycle.objects.get(name="API cycle")
+        self.assertEqual(cycle.release_id, release.id)
+        self.assertEqual(self.post_action("test-cycle-delete", test_cycle_id=cycle.id).status_code, 200)
+        self.assertEqual(self.post_action("release-delete", release_id=release.id).status_code, 200)
+        self.assertFalse(TestCycle.objects.filter(id=cycle.id).exists())
+        self.assertFalse(Release.objects.filter(id=release.id).exists())
+
+    def test_case_create_status_change_and_delete(self):
+        suite = TestSuite.objects.first()
+        self.assertEqual(
+            self.post_action(
+                "test-case-create",
+                test_case_id="TC-API-1",
+                test_case_name="Created via API",
+                test_suite_id=suite.id,
+            ).status_code,
+            200,
+        )
+        test_case = TestCaseModel.objects.get(id="TC-API-1")
+        self.assertEqual(test_case.suite_id, suite.id)
+        self.assertEqual(self.post_action("mdt-change-status", test_case_id=test_case.id, status="Pass").status_code, 200)
+        test_case.refresh_from_db()
+        self.assertEqual(test_case.status, "Pass")
+        self.assertEqual(self.post_action("test-case-delete", test_case_id=test_case.id).status_code, 200)
+        self.assertFalse(TestCaseModel.objects.filter(id=test_case.id).exists())

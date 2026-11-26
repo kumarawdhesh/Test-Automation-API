@@ -1,0 +1,21 @@
+
+.container {
+    padding: 32px;
+  }
+  
+  .column {
+    padding: 20px;
+    text-align: center;
+    /* margin-top: 10px; */
+  }
+  
+  .row-title {
+    font-weight: 600;
+  }
+  
+  /* Define elevation as a constant */
+  .elevation0 {
+    box-shadow: none !important;
+    height: 62px;
+  }
+  

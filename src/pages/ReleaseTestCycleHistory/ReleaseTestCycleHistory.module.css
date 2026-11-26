@@ -1,0 +1,236 @@
+.layout {
+  margin: 2%;
+}
+.align {
+  /* width: Hug (880px);
+      height: Fixed (1, 254px);
+      top: 100px;
+      left: 70px;
+      gap: 24px; */
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.bread {
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 19px;
+  letter-spacing: 0em;
+  text-align: left;
+  font-display: #424242;
+  /* padding: 20px; */
+}
+.subtitle {
+  padding: 5px 5px 5px 40px;
+  margin: 2%;
+}
+
+.body {
+  padding: 5px 5px 5px 5px;
+  height: 630px;
+  width: 80%;
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 25px;
+  letter-spacing: 0em;
+  text-align: left;
+  margin: 80%;
+  font-display: #424242;
+  font-style: arial;
+}
+
+.heading {
+  padding: 20px 0px;
+}
+
+.frame {
+  /* width: 900px; */
+  height: 440px;
+  line-height: 25px;
+  padding-bottom: 25px;
+  padding-right: 30px;
+  text-align: left;
+  font-style: Monospace;
+  font-weight: 500;
+  margin: 2%;
+}
+.button {
+  box-align: right !important;
+  padding: 6px 40px !important;
+}
+
+.list {
+  text-align: left;
+  list-style-type: none;
+  width: 880px;
+  padding: 6px 18px;
+  border-radius: 4px;
+  border: 1px;
+  border: 1px solid #e0e0e0;
+}
+.Articlelayout {
+  width: Hug (880px);
+  height: Hug (1254px);
+  top: 100px;
+  left: 70px;
+  gap: 24px;
+  margin: 2%;
+  line-height: 25px;
+  font-style: arial;
+}
+.Articleheading {
+  margin: 2% auto;
+  width: 238px;
+  height: 72px;
+  font-family: Inter;
+  gap: 5px;
+  padding: 10px 5px 5px 40px;
+  font-style: arial;
+}
+.Articleh3 {
+  padding: 10px 5px 5px 40px;
+}
+.Articalanswer {
+  width: 880px;
+  height: 152px;
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: 0em;
+  text-align: left;
+}
+.Articlesubtitle {
+  width: 638px;
+  height: 19px;
+  padding: 10px 5px 5px 40px;
+  font-family: Inter;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: 0em;
+  text-align: left;
+}
+
+.Articlebody {
+  padding: 10px 5px 5px 0px;
+  height: 630px;
+  width: 80%;
+  font-family: Inter;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 25px;
+  letter-spacing: 0em;
+  text-align: left;
+  margin: 80%;
+  font-display: #424242;
+  font-style: arial;
+}
+.updateStatus {
+  width: 638px;
+  height: 19px;
+  font-family: Inter;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 19px;
+  letter-spacing: 0em;
+  text-align: left;
+  padding: 5px;
+}
+.accordionItem {
+  /* padding: 12px 650px 12px 20px;
+      width: 255px;
+      height: 17px;
+      font-family: Inter;
+      font-size: 14px;
+      font-weight: 500;
+      line-height: 17px;
+      letter-spacing: 0px;
+      text-align: left; */
+  display: flex;
+  justify-content: space-between;
+}
+.customTab {
+  width: Hug (880px);
+  height: Hug (1, 033px);
+  gap: 10px;
+}
+.tab {
+  width: Fixed (151px);
+  height: Hug (25px);
+  gap: 20px;
+}
+.questions {
+  width: Fixed (880px);
+  height: Hug (1, 004px);
+  padding: 10px 0px 10px 0px;
+  border-radius: 4px;
+  border: 1px;
+  border: 1px solid #e0e0e0;
+}
+
+.btn {
+  background-color: #0ea5e9 !important;
+}
+
+.btn:hover {
+  background-color: #0ea5e9 !important;
+}
+.searchbar {
+  background: #efefef;
+  position: "relative";
+  width: "390px";
+  border-radius: "8px";
+}
+
+.searchIcon {
+  position: absolute;
+  right: 5px;
+}
+
+.tabs {
+  margin: 0 52px;
+}
+
+.item {
+  background: #f9f9f9 !important;
+  padding: 5px 15px !important;
+  border-radius: 8px !important;
+  justify-content: space-between;
+  cursor: pointer;
+  border: 1px solid #f0f0f0 !important;
+  box-shadow: none !important;
+  text-align: start !important;
+  font-size: 16px !important;
+  margin: 10px 10px 10px 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.releasescycleBox {
+  background: #f3f3f3;
+  padding: 15px 0;
+  margin: 15px 0;
+  text-align: start;
+  padding-left: 20px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.icon {
+  margin-right: 10;
+  font-size: 18px;
+}
+
+.text {
+  display: flex;
+  align-items: center;
+}
+
+.selectedItem {
+  border: 2px solid #3fb802 !important;
+}

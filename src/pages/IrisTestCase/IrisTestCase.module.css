@@ -1,0 +1,26 @@
+.container {
+  padding-left: 14px;
+  padding-right: 14px;
+  margin-bottom: 62px !important;
+}
+
+.btn {
+  background: #0ea5e9  !important;
+}
+
+.btn:hover {
+  background-color: #0ea5e9  !important;
+  cursor: pointer !important;
+}
+
+.savebtn {
+  color: black;
+  border: 1px solid gray !important;
+}
+
+.accordion {
+  background: rgb(50, 50, 50) !important;
+  color: white !important;
+  height: 47px !important;
+  min-height: 0 !important;
+}

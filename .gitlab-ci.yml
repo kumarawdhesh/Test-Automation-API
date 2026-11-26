@@ -1,0 +1,152 @@
+image: public.ecr.aws/docker/library/node:18.18.2
+
+stages:
+  - ui-deployment
+  - notify-slack
+
+variables:
+  BACKUP_FOLDER: "backup"
+  CLOUDFRONT_DEV: "E672KH3LFC4Y9"
+  CLOUDFRONT_FEATURE: "E1B67HR7K3087Z"
+  CLOUDFRONT_PROD: "E2WS2MAC2GUNEG"
+
+before_script:
+  - apt-get update -y && apt-get install -y awscli jq
+  - npm install --no-audit
+  - npm install --legacy-peer-deps
+  - npm update
+
+  # Determine environment based on branch name
+  - echo "Determining environment... $CI_COMMIT_REF_NAME"
+  - |
+    if echo "$CI_COMMIT_REF_NAME" | grep -q "^feature/"; then
+      export ENVIRONMENT="FEATURE"
+      export CLOUDFRONT_ID="$CLOUDFRONT_FEATURE"
+      export S3_BUCKET_NAME="$S3_BUCKET_NAME_FEATURE"
+    elif [[ "$CI_COMMIT_REF_NAME" == "dev" ]]; then
+      export ENVIRONMENT="DEV"
+      export CLOUDFRONT_ID="$CLOUDFRONT_DEV"
+      export S3_BUCKET_NAME="$S3_BUCKET_NAME_DEV"
+    elif [[ "$CI_COMMIT_REF_NAME" == "prod" ]]; then
+      export ENVIRONMENT="PROD"
+      export CLOUDFRONT_ID="$CLOUDFRONT_PROD"
+      export S3_BUCKET_NAME="$S3_BUCKET_NAME_PROD"
+    else
+      echo "Unknown branch, unable to determine environment."
+      exit 1
+    fi
+  - echo "Using S3 bucket:"
+  - echo $S3_BUCKET_NAME
+  - |
+    if [ -z "$S3_BUCKET_NAME" ]; then
+      echo "ERROR: S3_BUCKET_NAME is empty!"
+      exit 1
+    fi
+
+  # Setup AWS credentials
+  - echo "Setting up AWS CLI credentials for environment:"
+  - echo $ENVIRONMENT
+  - export AWS_ACCESS_KEY_ID=$(eval echo \$AWS_ACCESS_KEY_ID_${ENVIRONMENT})
+  - export AWS_SECRET_ACCESS_KEY=$(eval echo \$AWS_SECRET_ACCESS_KEY_${ENVIRONMENT})
+  - export AWS_DEFAULT_REGION=$(eval echo \$AWS_DEFAULT_REGION_${ENVIRONMENT})
+
+  - aws configure set aws_access_key_id "$AWS_ACCESS_KEY_ID"
+  - aws configure set aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+  - aws configure set region "$AWS_DEFAULT_REGION"
+
+UI Deployment:
+  stage: ui-deployment
+  environment:
+    name: "$CI_COMMIT_REF_NAME"
+  rules:
+    # Allow manual trigger for feature branches (disable auto-trigger)
+    - if: '$CI_COMMIT_REF_NAME =~ /^feature\//'
+      when: manual
+
+    # Auto deployment when merging to dev
+    - if: '$CI_COMMIT_REF_NAME == "dev"'
+      when: on_success
+
+    # Auto deployment when merging to prod
+    - if: '$CI_COMMIT_REF_NAME == "prod"'
+      when: on_success
+
+    # Prevent pipeline execution on PRs
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: never
+
+  script:
+    - echo "Building UI for $ENVIRONMENT..."
+    # Choose build command based on environment
+    - |
+      if [ "$ENVIRONMENT" = "FEATURE" ]; then
+        BUILD_CMD="npm run build:feature"
+      elif [ "$ENVIRONMENT" = "DEV" ]; then
+        BUILD_CMD="npm run build:dev"
+      elif [ "$ENVIRONMENT" = "PROD" ]; then
+        BUILD_CMD="npm run build:prod"
+      else
+        echo "Unknown environment: $ENVIRONMENT"
+        exit 1
+      fi
+    - echo "Running build command"
+    - CI=false $BUILD_CMD
+
+
+    - echo "Backing up current S3 bucket contents..."
+    - echo "s3://$S3_BUCKET_NAME/$TIMESTAMPED_BACKUP_FOLDER"
+    - export TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+    - export TIMESTAMPED_BACKUP_FOLDER="${BACKUP_FOLDER}/${TIMESTAMP}"
+    - aws s3 sync s3://$S3_BUCKET_NAME s3://$S3_BUCKET_NAME/$TIMESTAMPED_BACKUP_FOLDER --exclude "$BACKUP_FOLDER/*"
+
+    - echo "Deploying new UI to S3..."
+    - aws s3 sync dist/ s3://$S3_BUCKET_NAME --delete --exclude "$BACKUP_FOLDER/*"
+
+    - echo "Invalidating CloudFront cache for $ENVIRONMENT..."
+    - aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_ID" --paths "/*"
+  after_script:
+    - echo $CI_JOB_ID > deploy_job_id.txt
+  artifacts:
+    paths:
+      - deploy_job_id.txt
+
+.hidden-notify-slack:
+  stage: notify-slack
+  before_script:
+    - apt-get update -y && apt-get install -y curl jq
+  script:
+    - |
+        DEPLOY_JOB_ID=$(cat deploy_job_id.txt)
+        echo "Deploy Job ID: $DEPLOY_JOB_ID"
+        
+        # Fetch the job details and print them for debugging
+        JOB_DETAILS=$(curl --silent --header "PRIVATE-TOKEN: $SLACK_PAT" "https://gitlab.ea.com/api/v4/projects/$CI_PROJECT_ID/jobs/$DEPLOY_JOB_ID")
+        echo "Job Details: $JOB_DETAILS"        
+        
+        # Extract the status from the job details
+        DEPLOY_STATUS=$(echo $JOB_DETAILS | jq -r '.status')
+        DEPLOY_STAGE=$(echo $JOB_DETAILS | jq -r '.stage')
+        COMMITTER_NAME=$(echo $JOB_DETAILS | jq -r '.commit.committer_name')
+        PROMOTED_CHANGES_URL=$(echo $JOB_DETAILS | jq -r '.commit.web_url')
+        echo "Deploy Status: $DEPLOY_STATUS"        
+
+        curl -X POST -H 'Content-type: application/json' --data '{
+          "text": "Falcon Application - UI Repository ('"$CI_PROJECT_NAME"')",
+          "attachments": [
+            {
+              "title": "Pipeline Execution Summary : '"$DEPLOY_STAGE"'",
+              "fields": [
+                { "title": "Pipeline Status", "value": "'"$DEPLOY_STATUS"'", "short": true },
+                { "title": "Triggered By and Environment", "value": "Triggered by '"$COMMITTER_NAME"' in the '"$CI_COMMIT_REF_NAME"' environment", "short": true },
+                { "title": "Details", "value": "Commit Message: '"$CI_COMMIT_MESSAGE"'\nPipeline URL: '"$CI_PIPELINE_URL"'\nPipeline Start Time: '"$CI_PIPELINE_CREATED_AT"'\nChanges Promoted to '"$CI_COMMIT_REF_NAME"' : '"$PROMOTED_CHANGES_URL"'", "short": false }
+              ]
+            }
+          ]
+        }' $SLACK_WEBHOOK_URL
+  needs:
+    - UI Deployment
+  only:
+    - dev
+    - prod
+notify-slack:
+  extends: .hidden-notify-slack

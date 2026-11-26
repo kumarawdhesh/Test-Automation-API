@@ -1,0 +1,10 @@
+/* .content{
+    max-height: 300px;
+    width: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+} */
+
+.title {
+  font-weight: 600 !important;
+}

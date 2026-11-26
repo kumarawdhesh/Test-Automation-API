@@ -1,0 +1,15 @@
+.query-content {
+  max-width: 86px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.header {
+  background-color: #d8d8d8 !important;
+  padding-left: 30px;
+}
+.accordion {
+  background: #f2f2f2 !important;
+  height: 40px !important;
+  min-height: 0 !important;
+}

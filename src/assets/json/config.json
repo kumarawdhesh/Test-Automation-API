@@ -1,0 +1,6 @@
+{
+    "loginURL":  "https://dev-insights.auth.us-west-2.amazoncognito.com/oauth2/authorize?client_id=7enq6vah04m3e6f51m2lr1llqk&response_type=token&scope=email+openid+profile&redirect_uri=https://dev.insights.ea.com/login",
+    "logoutURL": "https://dev-insights.auth.us-west-2.amazoncognito.com/logout?client_id=7enq6vah04m3e6f51m2lr1llqk&logout_uri=https://dev.insights.ea.com/login",
+    "websocket": "wss://vy9cvgu4nf.execute-api.us-west-2.amazonaws.com/dev",
+    "apiURL": "https://wq1l293p79.execute-api.us-west-2.amazonaws.com/dev"
+}

@@ -1,0 +1,39 @@
+.container {
+  padding: 32px;
+}
+
+.column {
+  margin: 1rem;
+  text-align: center;
+}
+
+.row-title {
+  font-weight: 600 !important;
+}
+
+.dropdown {
+  display: flex;
+}
+.label {
+  font: "bold";
+  /* align: "left"; */
+  font-size: 8px;
+  padding: 100px 100px 0px 0px !important;
+}
+.elevation0 {
+  box-shadow: none !important;
+  height: 60px;
+}
+
+.box-container {
+  background-color: #fafbfc !important;
+  padding: 0.875rem 0.75rem;
+  border-radius: 0.5rem !important;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.css-11u53oe-MuiSelect-select-MuiInputBase-input-MuiOutlinedInput-input {
+  padding: 8.5px 11px;
+}

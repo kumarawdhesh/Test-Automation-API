@@ -1,0 +1,348 @@
+{
+  "article_1": {
+    "article": "What is Iris Conversational AI?",
+    "article_details": {
+      "title": "What is Iris Conversational AI?",
+      "sub_title": "Commonly asked questions about Iris",
+      "written_by": "John Doe",
+      "updated_status": "a week ago",
+      "question_1": "How does Iris work?",
+      "answer_1": "Iris is fine-tuned from EA IQ, prompt and execution engines with a LLM access layer. Iris leverages Open AI / ChatGPT API capabilities. Iris was optimized for dialogue by using Reinforcement Learning with Human Feedback (RLHF) and provides valuable insights to EA business units. By analyzing user interactions, sentiment, and preferences, Iris generates real-time data, helping orgs make data-driven decisions and refine their services.\n      Iris is not connected to the internet and it can occasionally produce incorrect answers. It is constrained to proprietary data from EA. We'd recommend checking whether responses from the model are accurate or not. If you find an answer is incorrect, please provide that feedback by using the \"Thumbs Down\" button.",
+      "question_2": "Who can view my conversations and how will they be used for training?",
+      "answer_2": "As part of our commitment to safe and responsible AI, we review conversations to improve our systems and to ensure the content complies with our policies and safety requirements. Your conversations may be reviewed by our AI trainers to improve our systems.",
+      "related_articles": [
+        "How is data used to improve model perfromance",
+        "Iris Release Notes",
+        "How can I integrate Iris to my own products",
+        "Iris Shared Links FAQ"
+      ]
+    }
+  },
+  "article_2": {
+    "article": "How does Iris work? ",
+    "article_details": {
+      "title": "How does Iris work?",
+      "sub_title": "Commonly asked questions about Iris  ",
+      "written_by": "John Doe ",
+      "updated_status": "a week ago ",
+      "question_1": "How does Iris work?",
+      "answer_1": "Iris is fine-tuned from EA IQ, prompt and execution engines with a LLM access layer. Iris leverages Open AI / ChatGPT API capabilities. Iris was optimized for dialogue by using Reinforcement Learning with Human Feedback (RLHF) and provides valuable insights to EA business units. By analyzing user interactions, sentiment, and preferences, Iris generates real-time data, helping orgs make data-driven decisions and refine their services.\n        Iris is not connected to the internet and it can occasionally produce incorrect answers. It is constrained to proprietary data from EA. We'd recommend checking whether responses from the model are accurate or not. If you find an answer is incorrect, please provide that feedback by using the \"Thumbs Down\" button.",
+      "question_2": "Who can view my conversations and how will they be used for training?",
+      "answer_2": "As part of our commitment to safe and responsible AI, we review conversations to improve our systems and to ensure the content complies with our policies and safety requirements. Your conversations may be reviewed by our AI trainers to improve our systems.",
+      "related_articles": [
+        "How is data used to improve model perfromance",
+        "Iris Release Notes",
+        "How can I integrate Iris to my own products",
+        "Iris Shared Links FAQ"
+      ]
+    }
+  },
+  "article_3": {
+    "article": "Can Iris understand natural language? ",
+    "article_details": {
+      "title": "Can Iris understand natural language?      ",
+      "sub_title": " ",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_4": {
+    "article": "What platforms can Iris be integrated with?",
+    "article_details": {
+      "title": "What platforms can Iris be integrated with?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_5": {
+    "article": "Is Iris capable of multi-language support?",
+    "article_details": {
+      "title": "Is Iris capable of multi-language support?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_6": {
+    "article": "How secure is the data shared with Iris?",
+    "article_details": {
+      "title": "How secure is the data shared with Iris?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_7": {
+    "article": "Can Iris handle voice commands? ",
+    "article_details": {
+      "title": "Can Iris handle voice commands?  ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_08": {
+    "article": "What types of applications can Iris be used for?    ",
+    "article_details": {
+      "title": "What types of applications can Iris be used for?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_09": {
+    "article": "Is Iris customizable to fit specific business needs?",
+    "article_details": {
+      "title": "Is Iris customizable to fit specific business needs?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_10": {
+    "article": "How does Iris handle sensitive information and privacy concerns?    ",
+    "article_details": {
+      "title": "How does Iris handle sensitive information and privacy concerns?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_11": {
+    "article": "Can Iris connect to external databases and APIs?    ",
+    "article_details": {
+      "title": "Can Iris connect to external databases and APIs?  ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_12": {
+    "article": "What machine learning techniques power Iris?    ",
+    "article_details": {
+      "title": "What machine learning techniques power Iris?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_13": {
+    "article": "Does Iris require internet connectivity to function?",
+    "article_details": {
+      "title": "Does Iris require internet connectivity to function?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_14": {
+    "article": "Can Iris be deployed on-premise or in the cloud?",
+    "article_details": {
+      "title": "Can Iris be deployed on-premise or in the cloud? ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_15": {
+    "article": "How does Iris handle user authentication and access control?    ",
+    "article_details": {
+      "title": "How does Iris handle user authentication and access control?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_16": {
+    "article": "Can Iris remember previous interactions and personalize responses?  ",
+    "article_details": {
+      "title": "Can Iris remember previous interactions and personalize responses?  ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_17": {
+    "article": "What kind of user data does Iris collect, and how is it used?    ",
+    "article_details": {
+      "title": "What kind of user data does Iris collect, and how is it used?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_18": {
+    "article": "Is Iris compliant with data protection regulations? ",
+    "article_details": {
+      "title": "Is Iris compliant with data protection regulations? ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_19": {
+    "article": "How is the accuracy of Iris responses ensured?    ",
+    "article_details": {
+      "title": "How is the accuracy of Iris responses ensured?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_20": {
+    "article": "Can Iris be trained on new data or updated with new information?    ",
+    "article_details": {
+      "title": "Can Iris be trained on new data or updated with new information?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_21": {
+    "article": "How much training data does Iris need to perform well?    ",
+    "article_details": {
+      "title": "How much training data does Iris need to perform well?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_22": {
+    "article": "Does Iris have a natural language understanding (NLU) capability?    ",
+    "article_details": {
+      "title": "Does Iris have a natural language understanding (NLU) capability?      ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_23": {
+    "article": "Can Iris integrate with existing chatbot platforms or systems?  ",
+    "article_details": {
+      "title": "Can Iris integrate with existing chatbot platforms or systems? ",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  },
+  "article_24": {
+    "article": "What support and maintenance options are available for Iris? ",
+    "article_details": {
+      "title": "What support and maintenance options are available for Iris?",
+      "sub_title": "",
+      "written_by": "",
+      "updated_status": "",
+      "question_1": "",
+      "answer_1": "",
+      "question_2": "",
+      "answer_2": "",
+      "related_articles": []
+    }
+  }
+}

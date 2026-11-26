@@ -1,0 +1,231 @@
+{
+  "access": {
+    "statusCode": 200,
+    "body": {
+      "organizations": [
+        {
+          "name": "Northstar Commerce",
+          "applications": [
+            { "name": "Customer Platform", "privileges": "Admin" },
+            { "name": "Order Services", "privileges": "Write" }
+          ]
+        },
+        {
+          "name": "Atlas Operations",
+          "applications": [
+            { "name": "Inventory Hub", "privileges": "Execute" },
+            { "name": "Fulfillment API", "privileges": "Read" }
+          ]
+        }
+      ]
+    }
+  },
+  "dashboard": {
+    "quick_stats": { "test_cases": 128, "executed": 96, "pass": 81, "fail": 11, "flaky": 4, "avg_execution_time_sec": 18.6 },
+    "jass_details_report": { "in_progress": 3, "to_do": 2, "done": 14 },
+    "execution_trends": {
+      "2026-10-20": { "Pass": 12, "Fail": 2, "Flaky": 1 },
+      "2026-10-21": { "Pass": 18, "Fail": 1, "Flaky": 0 },
+      "2026-10-22": { "Pass": 15, "Fail": 3, "Flaky": 1 },
+      "2026-10-23": { "Pass": 21, "Fail": 2, "Flaky": 1 },
+      "2026-10-24": { "Pass": 15, "Fail": 3, "Flaky": 1 }
+    },
+    "test_details": [
+      { "test_type": "Data_Testing", "total": 58, "pass": 43, "fail": 9, "not_executed": 6 },
+      { "test_type": "Iris", "total": 42, "pass": 31, "fail": 4, "not_executed": 7 },
+      { "test_type": "Nexus", "total": 28, "pass": 19, "fail": 3, "not_executed": 6 }
+    ]
+  },
+  "testSuites": [
+    {
+      "test_suite_id": "TS-2401",
+      "test_suite_name": "Checkout Core Regression",
+      "test_suite_desc": "Cart, pricing, and payment acceptance coverage.",
+      "_modified_by": "Avery Chen",
+      "test_cases": [
+        { "test_case_id": "TC-8101", "test_case_name": "Valid card completes checkout", "test_type": "Data_Testing", "test_config": { "test_case_type": "Data_Testing", "execution_engine": "PostgreSQL", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8101", "target_sql": "payment_status = 'approved'" } }, "status": "Pass", "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8101", "target_sql": "payment_status = 'approved'", "execution_message": "Order was approved and confirmation was recorded.", "test_suite_name": "Checkout Core Regression" },
+        { "test_case_id": "TC-8102", "test_case_name": "Expired card is rejected", "test_type": "Data_Testing", "test_config": { "test_case_type": "Data_Testing", "execution_engine": "PostgreSQL", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8102", "target_sql": "payment_status = 'declined'" } }, "status": "Fail", "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8102", "target_sql": "payment_status = 'declined'", "execution_message": "Expected declined, received pending.", "test_suite_name": "Checkout Core Regression" },
+        { "test_case_id": "TC-8103", "test_case_name": "Discount applies once", "test_type": "Iris", "test_config": { "test_case_type": "NLQ_Testing", "execution_engine": "Iris", "source_connection": { "name": "Analytics Demo Warehouse" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT discount_total FROM orders WHERE order_id = 8103", "target_sql": "discount_total = 12.50" } }, "status": "Pass", "source_query": "{\"source_query\":\"SELECT discount_total FROM orders WHERE order_id = 8103\"}", "target_query": "discount_total = 12.50", "execution_message": "Discount total matched expected value.", "test_suite_name": "Checkout Core Regression" }
+      ]
+    },
+    {
+      "test_suite_id": "TS-2402",
+      "test_suite_name": "Inventory Synchronization",
+      "test_suite_desc": "Stock accuracy between catalog and warehouse feeds.",
+      "_modified_by": "Jordan Patel",
+      "test_cases": [
+        { "test_case_id": "TC-8201", "test_case_name": "New shipment updates available stock", "test_type": "Data_Testing", "test_config": { "test_case_type": "Data_Testing", "execution_engine": "PostgreSQL", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT available_qty FROM catalog_stock WHERE sku = 'IL-204'", "target_sql": "available_qty = 42" } }, "status": "Pass", "source_sql": "SELECT available_qty FROM catalog_stock WHERE sku = 'IL-204'", "target_sql": "available_qty = 42", "execution_message": "Stock levels synchronized.", "test_suite_name": "Inventory Synchronization" },
+        { "test_case_id": "TC-8202", "test_case_name": "Duplicate shipment is idempotent", "test_type": "Nexus", "test_config": { "test_case_type": "NLQ_Testing", "execution_engine": "Nexus", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT COUNT(*) FROM inventory_events WHERE event_key = 'EV-82'", "target_sql": "COUNT(*) = 1" } }, "status": "Not Executed", "source_sql": "SELECT COUNT(*) FROM inventory_events WHERE event_key = 'EV-82'", "target_sql": "COUNT(*) = 1", "execution_message": "Waiting for a test cycle.", "test_suite_name": "Inventory Synchronization" }
+      ]
+    },
+    {
+      "test_suite_id": "TS-2403",
+      "test_suite_name": "Customer Profile API",
+      "test_suite_desc": "Profile validation, consent, and data retention rules.",
+      "_modified_by": "Morgan Lee",
+      "test_cases": [
+        { "test_case_id": "TC-8301", "test_case_name": "Consent flag persists after profile update", "test_type": "Iris", "test_config": { "test_case_type": "NLQ_Testing", "execution_engine": "Iris", "source_connection": { "name": "Analytics Demo Warehouse" }, "target_connection": { "name": "Analytics Demo Warehouse" }, "queries": { "source_sql": "SELECT marketing_consent FROM customer_profiles WHERE customer_id = 8301", "target_sql": "marketing_consent = true" } }, "status": "Pass", "source_query": "{\"source_query\":\"SELECT marketing_consent FROM customer_profiles WHERE customer_id = 8301\"}", "target_query": "marketing_consent = true", "execution_message": "Consent flag was retained.", "test_suite_name": "Customer Profile API" }
+      ]
+    }
+  ],
+  "releases": [
+    { "release_id": "REL-26.10", "release_name": "October Platform Release", "status": "In Progress", "start_date": "2026-10-01", "end_date": "2026-10-31" },
+    { "release_id": "REL-26.09", "release_name": "September Reliability Update", "status": "Completed", "start_date": "2026-09-01", "end_date": "2026-09-30" }
+  ],
+  "testCycles": [
+    { "test_cycle_id": "CY-5501", "test_cycle_result_id": "RUN-CY-5501", "test_cycle_name": "Checkout RC 2", "release_id": "REL-26.10", "status": "Success", "time_stamp": "2026-10-24T15:22:00Z", "user_id": "avery.chen@ilink.demo", "start_ts": "2026-10-24T14:50:00Z", "end_ts": "2026-10-24T15:22:00Z", "total_test_case_count": 3, "total_pass_count": 2, "test_cases": [
+      { "test_case_id": "TC-8101", "test_case_result_id": "RUN-TC-8101", "test_case_name": "Valid card completes checkout", "test_suite_id": "TS-2401", "test_suite_name": "Checkout Core Regression", "status": "Pass", "execution_engine": "PostgreSQL", "execution_message": "Payment accepted and order persisted.", "source_query": "{\"source_query\":\"SELECT payment_status FROM checkout_orders WHERE order_id = 8101\"}", "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8101", "target_query": "payment_status = 'approved'", "target_sql": "payment_status = 'approved'", "test_config": { "test_case_type": "Data_Testing", "execution_engine": "PostgreSQL", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" } } },
+      { "test_case_id": "TC-8102", "test_case_result_id": "RUN-TC-8102", "test_case_name": "Expired card is rejected", "test_suite_id": "TS-2401", "test_suite_name": "Checkout Core Regression", "status": "Fail", "execution_engine": "PostgreSQL", "execution_message": "Expected declined, received pending.", "source_query": "{\"source_query\":\"SELECT payment_status FROM checkout_orders WHERE order_id = 8102\",\"jaas_key\":\"ILINK-1042\"}", "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8102", "target_query": "payment_status = 'declined'", "target_sql": "payment_status = 'declined'", "test_config": { "test_case_type": "Data_Testing", "execution_engine": "PostgreSQL", "source_connection": { "name": "Orders Demo DB" }, "target_connection": { "name": "Analytics Demo Warehouse" } }, "is_multi_step_enabled": true, "multi_step_results": [{ "multi_step_result_id": "MS-8102-1", "app_name": "Order API", "execution_message": "Order request accepted.", "status": "Pass", "batch_execution_id": "BATCH-8102", "job_execution_id": "JOB-8102", "job_name": "order-validation", "batch_id": "B-8102", "batch_name": "Checkout validation" }] },
+      { "test_case_id": "TC-8103", "test_case_result_id": "RUN-TC-8103", "test_case_name": "Discount applies once", "test_suite_id": "TS-2401", "test_suite_name": "Checkout Core Regression", "status": "Pass", "execution_engine": "Iris", "execution_message": "Discount total matched expected value.", "source_query": "{\"source_query\":\"SELECT discount_total FROM orders WHERE order_id = 8103\"}", "source_sql": "SELECT discount_total FROM orders WHERE order_id = 8103", "target_query": "discount_total = 12.50", "target_sql": "discount_total = 12.50", "test_config": { "test_case_type": "NLQ_Testing", "execution_engine": "Iris", "source_connection": { "name": "Analytics Demo Warehouse" }, "target_connection": { "name": "Analytics Demo Warehouse" } } }
+    ] },
+    { "test_cycle_id": "CY-5502", "test_cycle_result_id": "RUN-CY-5502", "test_cycle_name": "Inventory API Smoke", "release_id": "REL-26.10", "status": "Fail", "time_stamp": "2026-10-23T09:10:00Z", "user_id": "jordan.patel@ilink.demo", "start_ts": "2026-10-23T09:10:00Z", "end_ts": "2026-10-23T09:18:00Z", "total_test_case_count": 2, "total_pass_count": 1, "test_cases": [
+      { "test_case_id": "TC-8201", "test_case_result_id": "RUN-TC-8201", "test_case_name": "New shipment updates available stock", "test_suite_id": "TS-2402", "test_suite_name": "Inventory Synchronization", "status": "Pass", "execution_engine": "PostgreSQL", "execution_message": "Stock levels synchronized.", "source_query": "{\"source_query\":\"SELECT available_qty FROM catalog_stock WHERE sku = 'IL-204'\"}", "source_sql": "SELECT available_qty FROM catalog_stock WHERE sku = 'IL-204'", "target_query": "available_qty = 42", "target_sql": "available_qty = 42" },
+      { "test_case_id": "TC-8202", "test_case_result_id": "RUN-TC-8202", "test_case_name": "Duplicate shipment is idempotent", "test_suite_id": "TS-2402", "test_suite_name": "Inventory Synchronization", "status": "Fail", "execution_engine": "Nexus", "execution_message": "Duplicate event produced a second stock update.", "source_query": "{\"source_query\":\"SELECT COUNT(*) FROM inventory_events WHERE event_key = 'EV-82'\",\"jaas_key\":\"ILINK-1042\"}", "source_sql": "SELECT COUNT(*) FROM inventory_events WHERE event_key = 'EV-82'", "target_query": "COUNT(*) = 1", "target_sql": "COUNT(*) = 1" }
+    ] },
+    { "test_cycle_id": "CY-5503", "test_cycle_result_id": "RUN-CY-5503", "test_cycle_name": "Checkout payment monitor", "release_id": "REL-26.10", "status": "Running", "time_stamp": "2026-10-28T08:40:00Z", "user_id": "local.explorer@ilink.demo", "start_ts": "2026-10-28T08:40:00Z", "end_ts": "None", "total_test_case_count": 2, "total_pass_count": 1, "test_cases": [
+      { "test_case_id": "TC-8101", "test_case_result_id": "RUN-TC-8101-LIVE", "test_case_name": "Valid card completes checkout", "test_suite_id": "TS-2401", "test_suite_name": "Checkout Core Regression", "status": "Running", "execution_engine": "PostgreSQL", "execution_message": "Payment authorization in progress.", "source_query": "{\"source_query\":\"SELECT payment_status FROM checkout_orders WHERE order_id = 8101\"}", "source_sql": "SELECT payment_status FROM checkout_orders WHERE order_id = 8101", "target_query": "payment_status = 'approved'", "target_sql": "payment_status = 'approved'" }
+    ] },
+    { "test_cycle_id": "CY-5410", "test_cycle_result_id": "RUN-CY-5410", "test_cycle_name": "September Full Regression", "release_id": "REL-26.09", "status": "Success", "time_stamp": "2026-09-28T13:05:00Z", "user_id": "morgan.lee@ilink.demo", "start_ts": "2026-09-28T12:15:00Z", "end_ts": "2026-09-28T13:05:00Z", "total_test_case_count": 3, "total_pass_count": 3, "test_cases": [] }
+  ],
+  "connections": {
+    "PostgreSQL": [{ "connectionId": "demo-pg-orders", "connectionName": "Orders Demo DB" }],
+    "Snowflake": [{ "connection_id": "demo-snowflake-analytics", "connection_name": "Analytics Demo Warehouse", "connectionName": "Analytics Demo Warehouse" }],
+    "Oracle": [{ "connectionId": "demo-oracle-legacy", "connectionName": "Legacy Demo DB" }]
+  },
+  "schemas": [
+    { "schema": "PUBLIC", "tables": [{ "name": "ORDERS" }, { "name": "CUSTOMERS" }, { "name": "PAYMENTS" }] },
+    { "schema": "WAREHOUSE", "tables": [{ "name": "INVENTORY" }, { "name": "SHIPMENTS" }] }
+  ],
+  "columns": {
+    "source_tables": { "ORDERS": { "ORDER_ID": "NUMBER", "CUSTOMER_ID": "NUMBER", "ORDER_TOTAL": "DECIMAL", "ORDER_STATUS": "VARCHAR" } },
+    "target_tables": { "ORDERS": { "ORDER_ID": "INTEGER", "CUSTOMER_ID": "INTEGER", "TOTAL_AMOUNT": "DECIMAL", "STATUS": "VARCHAR" } }
+  },
+  "scenarios": [
+    { "scenario_name": "Row count matches", "category": "data_validation" },
+    { "scenario_name": "Primary keys are unique", "category": "data_validation" },
+    { "scenario_name": "Required fields are populated", "category": "data_validation" }
+  ],
+  "schedules": [
+    { "test_cycle_id": "CY-5501", "test_cycle_name": "Checkout RC 2", "schedule_name": "Weekday checkout smoke", "schedule_type": "RECURRING", "frequency": "weekly", "enabled": true, "schedule_status": "Active", "next_trigger": "2026-10-28T09:00:00Z", "days_of_week": ["MON", "WED", "FRI"], "start_date": "2026-10-01T09:00:00Z", "end_date": "2026-12-31T23:59:59Z" },
+    { "test_cycle_id": "CY-5502", "test_cycle_name": "Inventory API Smoke", "schedule_name": "Inventory nightly", "schedule_type": "RECURRING", "frequency": "every_x_days", "schedule_interval": "1", "enabled": false, "schedule_status": "Paused", "next_trigger": "expired", "start_date": "2026-10-01T01:00:00Z", "end_date": "2026-10-15T23:59:59Z" }
+  ],
+  "reportExamples": {
+    "testCycleSummary": {
+      "test_cycle_summary": { "test_cycle_name": "Checkout RC 2", "unique_test_cases": 3, "pass_percentage": 67, "total_test_case_executions_count": 6, "total_passed": 4, "total_failed": 2, "avg_execution_time_sec": 18.6, "environments": "Demo / Local", "first_run_date": "2026-10-20T09:00:00Z", "last_run_date": "2026-10-24T15:22:00Z", "highest_retry_count": 2, "re_executed_test_cases": 1, "total_cycle_executions": 3 },
+      "test_case_run_summary": [
+        { "test_case_id": "TC-8101", "test_case_name": "Valid card completes checkout", "total_runs": 3, "latest_status": "Pass", "pass_count": 3, "fail_count": 0, "first_run_date": "2026-10-20T09:05:00Z", "last_run_date": "2026-10-24T15:00:00Z" },
+        { "test_case_id": "TC-8102", "test_case_name": "Expired card is rejected", "total_runs": 3, "latest_status": "Fail", "pass_count": 1, "fail_count": 2, "first_run_date": "2026-10-20T09:10:00Z", "last_run_date": "2026-10-24T15:08:00Z" },
+        { "test_case_id": "TC-8103", "test_case_name": "Discount applies once", "total_runs": 2, "latest_status": "Pass", "pass_count": 2, "fail_count": 0, "first_run_date": "2026-10-21T11:00:00Z", "last_run_date": "2026-10-24T15:12:00Z" }
+      ],
+      "test_case_execution_history": {
+        "TC-8101": [{ "tc_execution_start_ts": "2026-10-24T14:58:00Z", "tc_execution_end_ts": "2026-10-24T15:00:00Z", "tc_result_status": "Pass", "execution_message": "Payment accepted and order persisted." }],
+        "TC-8102": [{ "tc_execution_start_ts": "2026-10-24T15:06:00Z", "tc_execution_end_ts": "2026-10-24T15:08:00Z", "tc_result_status": "Fail", "execution_message": "Payment status remained pending." }],
+        "TC-8103": [{ "tc_execution_start_ts": "2026-10-24T15:10:00Z", "tc_execution_end_ts": "2026-10-24T15:12:00Z", "tc_result_status": "Pass", "execution_message": "Discount total matched expected." }]
+      },
+      "final_summary": "Checkout coverage is stable for approved payments. The expired-card flow needs a status transition fix before release."
+    },
+    "domainWise": {
+      "domain_summary": { "total_test_cycles": 3, "unique_test_cases": 6, "pass_percentage": 83.3, "avg_execution_time_sec": 18.6, "environments": "Local Demo, CI Demo" },
+      "test_cycle_breakdown": [
+        { "test_cycle_id": "CY-5501", "test_cycle_name": "Checkout RC 2", "unique_test_cases": 3, "pass_percentage": 67, "pass_count": 2, "fail_count": 1 },
+        { "test_cycle_id": "CY-5502", "test_cycle_name": "Inventory API Smoke", "unique_test_cases": 2, "pass_percentage": 50, "pass_count": 1, "fail_count": 1 },
+        { "test_cycle_id": "CY-5503", "test_cycle_name": "Checkout payment monitor", "unique_test_cases": 1, "pass_percentage": 100, "pass_count": 1, "fail_count": 0 }
+      ],
+      "test_case_summary": [
+        { "test_case_name": "Valid card completes checkout", "test_case_type": "Data_Testing", "total_runs": 3, "pass_count": 3, "fail_count": 0, "pass_percentage": 100, "first_run_date": "2026-10-20", "last_run_date": "2026-10-24", "latest_status": "Pass" },
+        { "test_case_name": "Expired card is rejected", "test_case_type": "Data_Testing", "total_runs": 3, "pass_count": 1, "fail_count": 2, "pass_percentage": 33.3, "first_run_date": "2026-10-20", "last_run_date": "2026-10-24", "latest_status": "Fail" },
+        { "test_case_name": "Duplicate shipment is idempotent", "test_case_type": "Nexus", "total_runs": 2, "pass_count": 1, "fail_count": 1, "pass_percentage": 50, "first_run_date": "2026-10-22", "last_run_date": "2026-10-23", "latest_status": "Fail" }
+      ],
+      "failure_hotspots": [{ "test_case_name": "Expired card is rejected", "failure_count": 2, "affected_cycles": 2, "failure_messages": "Payment status remained pending.", "last_failure_date": "2026-10-24" }, { "test_case_name": "Duplicate shipment is idempotent", "failure_count": 1, "affected_cycles": 1, "failure_messages": "Duplicate event produced a second stock update.", "last_failure_date": "2026-10-23" }],
+      "execution_trends_by_date": [{ "execution_date": "2026-10-20", "total_executions": 8, "pass_count": 6, "fail_count": 2 }, { "execution_date": "2026-10-22", "total_executions": 11, "pass_count": 9, "fail_count": 2 }, { "execution_date": "2026-10-24", "total_executions": 9, "pass_count": 7, "fail_count": 2 }],
+      "environment_comparison": [{ "environment": "Local Demo", "pass_percentage": 83.3, "fail_count": 2, "unique_test_cases": 6 }, { "environment": "CI Demo", "pass_percentage": 91.7, "fail_count": 1, "unique_test_cases": 6 }],
+      "retry_analysis": { "summary": { "total_test_cases_with_retries": 2, "successful_after_retry": 1, "retry_success_rate": 50 }, "retry_details": [{ "test_case_id": "TC-8102", "test_case_name": "Expired card is rejected", "test_cycle_id": "CY-5501", "retry_count": 2, "success_after_retry": false, "final_status": "Fail", "last_execution": "2026-10-24" }, { "test_case_id": "TC-8101", "test_case_name": "Valid card completes checkout", "test_cycle_id": "CY-5501", "retry_count": 1, "success_after_retry": true, "final_status": "Pass", "last_execution": "2026-10-24" }] },
+      "failure_categorization": [{ "category": "State transition", "count": 2 }, { "category": "Duplicate event", "count": 1 }],
+      "ai_summary": "Checkout is healthy overall. Focus remediation on declined-payment state transitions and idempotent inventory event handling."
+    },
+    "releaseWise": {
+      "release_summary": { "release_id": "REL-26.10", "release_name": "October Platform Release", "pass_percentage": 83.3, "unique_test_cases": 6, "total_test_case_executions_count": 36, "total_test_cycles": 3, "avg_execution_time_sec": 18.6 },
+      "domain_breakdown": [{ "domain_name": "Northstar Commerce", "sub_domain_name": "Customer Platform", "pass_percentage": 86 }, { "domain_name": "Atlas Operations", "sub_domain_name": "Inventory Hub", "pass_percentage": 75 }],
+      "test_cycle_breakdown": [{ "test_cycle_id": "CY-5501", "test_cycle_name": "Checkout RC 2", "unique_test_cases": 3, "pass_percentage": 67, "pass_count": 2, "fail_count": 1 }, { "test_cycle_id": "CY-5502", "test_cycle_name": "Inventory API Smoke", "unique_test_cases": 2, "pass_percentage": 50, "pass_count": 1, "fail_count": 1 }, { "test_cycle_id": "CY-5503", "test_cycle_name": "Checkout payment monitor", "unique_test_cases": 1, "pass_percentage": 100, "pass_count": 1, "fail_count": 0 }],
+      "failure_categorization": [{ "failure_category": "State transition", "count": 2 }, { "failure_category": "Duplicate event", "count": 1 }],
+      "cycle_comparison": [{ "current_cycle_id": "CY-5501", "current_pass_percentage": 86, "previous_pass_percentage": 78, "pass_rate_delta": 8, "trend": "Improvement" }, { "current_cycle_id": "CY-5502", "current_pass_percentage": 75, "previous_pass_percentage": 82, "pass_rate_delta": -7, "trend": "Regression" }],
+      "ai_summary": "The release is trending upward in checkout quality. Inventory idempotency remains the primary release risk."
+    }
+  },
+  "apiResponses": {
+    "mdt-get-user-access-info": { "statusCode": 200, "body": { "organizations": [{ "name": "Northstar Commerce", "applications": [{ "name": "Customer Platform", "privileges": "Admin" }, { "name": "Order Services", "privileges": "Write" }] }, { "name": "Atlas Operations", "applications": [{ "name": "Inventory Hub", "privileges": "Execute" }, { "name": "Fulfillment API", "privileges": "Read" }] }] } },
+    "token-exchange": { "user_id": "local.explorer@ilink.demo", "id_token": "demo-token-not-for-authentication", "expire": 4102444800 },
+    "get_dashboard_stats": { "quick_stats": { "test_cases": 128, "executed": 96, "pass": 81, "fail": 11, "flaky": 4, "avg_execution_time_sec": 18.6 }, "jass_details_report": { "in_progress": 3, "to_do": 2, "done": 14 }, "execution_trends": { "2026-10-24": { "Pass": 15, "Fail": 3, "Flaky": 1 } }, "test_details": [{ "test_type": "Data_Testing", "total": 58, "pass": 43, "fail": 9 }, { "test_type": "Iris", "total": 42, "pass": 31, "fail": 4 }, { "test_type": "Nexus", "total": 28, "pass": 19, "fail": 3 }] },
+    "get-suite-cases": { "statusCode": 200, "body": { "data": [], "overll_test_suite_count": 0 } },
+    "get-test-suites": { "statusCode": 200, "body": { "test_suites": [] } },
+    "get-test-cases": { "statusCode": 200, "body": { "test_cases": [] } },
+    "get-release-testcycles": { "statusCode": 200, "data": { "releases": [], "test_cycles": [] } },
+    "get-test-cycles": { "statusCode": 200, "body": { "test_cycles": [] } },
+    "get-executions": { "statusCode": 200, "data": { "test_cycle_executions": [], "total_count": 0 } },
+    "get_schedule_details": { "statusCode": 200, "body": [] },
+    "get-nexus-domains": { "statusCode": 200, "body": [{ "domain_name": "Analytics Demo", "workspace_name": "Retail Insights", "workspace_id": "WS-301" }] },
+    "get-nexus-test-cases": { "statusCode": 200, "body": { "data": [] } },
+    "mdt-get-all-schema-tables": { "statusCode": 200, "body": [] },
+    "mdt-get-schema-tables-columns-details": { "statusCode": 200, "body": { "columns": { "source_tables": {}, "target_tables": {} }, "mappings": { "default_mappings": [], "llm_mappings": [], "variant_mappings": [] } } },
+    "mdt-data-testing-sql-generation": { "statusCode": 200, "body": { "sql_queries": [] } },
+    "get-test-case-executions": { "statusCode": 200, "data": { "test_cases": [] } },
+    "get-test-execution-logs": { "statusCode": 200, "body": "{\"data\": []}" },
+    "execute": { "statusCode": 200, "message": "Execution simulated in local demo mode." },
+    "test-suite-create": { "statusCode": 200, "message": "Demo test suite created." },
+    "test-suite-modify": { "statusCode": 200, "message": "Demo test suite updated." },
+    "test-suite-delete": { "statusCode": 200, "message": "Demo test suite deleted." },
+    "release-delete": { "statusCode": 200, "message": "Demo release deleted." },
+    "test-cycle-delete": { "statusCode": 200, "message": "Demo test cycle deleted." },
+    "test-case-delete": { "statusCode": 200, "message": "Demo test case deleted." },
+    "scheduler": { "statusCode": 200, "message": "Schedule action simulated in local demo mode." },
+    "generate_test_cycle_report": { "test_cycle_summary": { "test_cycle_name": "Checkout RC 2", "unique_test_cases": 3, "pass_percentage": 86, "total_test_case_executions_count": 14, "total_passed": 12, "total_failed": 2, "avg_execution_time_sec": 18.6, "environments": "Demo", "first_run_date": "2026-10-24", "last_run_date": "2026-10-24", "highest_retry_count": 2, "re_executed_test_cases": 1, "total_cycle_executions": 1 }, "test_case_run_summary": [], "test_case_execution_history": {}, "final_summary": "Synthetic test-cycle report." },
+    "list-test-cycles": { "statusCode": 200, "body": { "test_cycles": [{ "test_cycle_id": "CY-5501", "test_cycle_name": "Checkout RC 2" }, { "test_cycle_id": "CY-5502", "test_cycle_name": "Inventory API Smoke" }] } },
+    "list-releases": { "statusCode": 200, "data": { "releases": [{ "release_id": "REL-26.10", "release_name": "October Platform Release" }, { "release_id": "REL-26.09", "release_name": "September Reliability Update" }] } },
+    "list-test-cases": { "statusCode": 200, "body": { "test_cases": [{ "test_case_id": "TC-8101", "test_case_name": "Valid card completes checkout", "test_suite_name": "Checkout Core Regression" }, { "test_case_id": "TC-8102", "test_case_name": "Expired card is rejected", "test_suite_name": "Checkout Core Regression" }, { "test_case_id": "TC-8201", "test_case_name": "New shipment updates available stock", "test_suite_name": "Inventory Synchronization" }] } },
+    "release-create": { "statusCode": 200, "message": "Demo release created." },
+    "test-cycle-create": { "statusCode": 200, "message": "Demo test cycle created." },
+    "get-test-cycle-info": { "statusCode": 200, "data": { "test_suites": [{ "test_suite_id": "TS-2401", "test_suite_name": "Checkout Core Regression", "test_cases": [{ "test_case_id": "TC-8101", "depends_on": [] }, { "test_case_id": "TC-8102", "depends_on": [] }] }] } },
+    "test-cycle-modify": { "statusCode": 200, "message": "Demo test cycle updated." },
+    "test-case-create": { "statusCode": 200, "message": "Demo test case created.", "total_successfully_created_testcases": 1, "total_failed_testcases": [] },
+    "test-case-modify": { "statusCode": 200, "message": "Demo test case updated." },
+    "mdt-create-iris-testcase": { "statusCode": 200, "message": "Demo Iris test case created.", "is_all_created": true, "body": [{ "testcasename": "Demo generated question", "iscreate": true, "message": "Created in local demo mode." }] },
+    "mdt-modify-iris-testcase": { "statusCode": 200, "message": "Demo Iris test case updated." },
+    "create-nexus-testcase": { "statusCode": 200, "message": "Demo Nexus test case created." },
+    "modify-nexus-testcase": { "statusCode": 200, "message": "Demo Nexus test case updated." },
+    "mdt-get-iris-response": { "statusCode": 200, "body": { "domains_list": ["Retail Insights", "Customer Trends", "Order Health"] } },
+    "get-workspace-id": { "statusCode": 200, "body": [{ "workspace_id": "WS-301", "domain_name": "Retail Insights" }, { "workspace_id": "WS-302", "domain_name": "Customer Trends" }] },
+    "mdt-entity-handler": { "statusCode": 200, "body": ["ORDER_STATUS", "CUSTOMER_TIER", "REGION", "PRODUCT_CATEGORY"] },
+    "mdt-question-sql-generation": { "statusCode": 200, "body": [{ "question": "What is the weekly order volume by region?", "sql": "SELECT region, COUNT(*) AS order_count FROM orders GROUP BY region" }, { "question": "Which customer tier has the highest average order value?", "sql": "SELECT customer_tier, AVG(order_total) FROM orders GROUP BY customer_tier" }] },
+    "mdt-validate-sql": { "status": 200, "statusCode": 200, "message": "SQL validation passed." },
+    "generate-file-upload-url": { "statusCode": 200, "body": { "upload_url": "http://localhost:1234/__demo_upload__", "s3_uri": "demo://uploads/sample-test-data.csv", "fields": { "key": "demo/sample-test-data.csv" } } },
+    "falcon-create-bulk-tc": { "statusCode": 200, "message": "Demo bulk upload accepted." },
+    "falcon-create-bulk-tc/get-status": { "status": "process_completed", "total_data_check_count": 2, "total_iris_count": 1, "total_nexus_count": 1, "data_check_error_count": 0, "iris_error_count": 0, "nexus_error_count": 0, "data_check_modify_count": 0, "iris_modify_count": 0, "nexus_modify_count": 0, "data_check_results": "[]", "iris_results": "[]", "nexus_results": "[]" },
+    "get-bulk-upload-templet": { "statusCode": 200, "body": "/src/assets/json/demo-data.json" },
+    "get-falcon-lite-bulk-upload-template": { "statusCode": 200, "body": "/src/assets/json/demo-data.json" },
+    "mdt-download-report": { "statusCode": 200, "body": { "download_url": "/src/assets/json/demo-data.json", "file_password": null } },
+    "mdt-download-test-cycle-report": { "statusCode": 200, "body": { "download_url": "/src/assets/json/demo-data.json", "file_password": null } },
+    "mdt-download-test-suite": { "statusCode": 200, "s3url": "/src/assets/json/demo-data.json", "message": "Demo report ready." },
+    "get-test-case-report": { "statusCode": 200, "body": { "download_url": "/src/assets/json/demo-data.json", "file_password": null } },
+    "mdt-change-status": { "statusCode": 200, "message": "Demo status updated." },
+    "mdt-stop-execution": { "statusCode": 200, "message": "Demo execution stopped." },
+    "get-jaas-projects": { "statusCode": 200, "body": { "issue_types": ["Bug", "Task", "Story"], "project_details": [{ "key": "ILINK", "name": "I Link Platform" }, { "key": "QAOPS", "name": "Quality Operations" }] } },
+    "create-jaas-ticket": { "statusCode": 200, "body": { "created_issues": [{ "key": "ILINK-1042" }], "failed_indices": [] } },
+    "get-jaas-status": { "statusCode": 200, "body": [{ "key": "ILINK-1042", "status": "In Progress" }] },
+    "get-multistep-logs": { "statusCode": 200, "body": [{ "timestamp": "1792854000000", "message": "Demo multi-step validation completed." }] },
+    "get-all-jaas-tickets": { "statusCode": 200, "body": { "data": [{ "jaas_key": "ILINK-1042", "jaas_issue_type": "Bug", "jaas_project_name": "I Link Platform", "test_case_name": "Expired card is rejected", "tc_result_id": "RUN-CY-5502", "test_cycle_name": "Inventory API Smoke", "assignee": "Local Explorer", "created": "2026-10-24", "status": "In Progress", "ticket_link": "#" }] } },
+    "get-release-info": { "statusCode": 200, "body": { "release_id": "REL-26.10", "release_name": "October Platform Release" } },
+    "generate_domain_report": { "statusCode": 200, "body": { "domain_summary": { "total_test_cycles": 3, "unique_test_cases": 18, "pass_percentage": 88.9, "avg_execution_time_sec": 18.6, "environments": "Demo" }, "test_cycle_breakdown": [], "test_case_summary": [], "failure_hotspots": [], "execution_trends_by_date": [], "environment_comparison": [], "retry_analysis": { "summary": {}, "retry_details": [] }, "failure_categorization": [], "ai_summary": "Synthetic domain report for the demo workspace." } },
+    "generate_release_report": { "statusCode": 200, "body": { "release_summary": { "release_id": "REL-26.10", "release_name": "October Platform Release", "pass_percentage": 88.9, "unique_test_cases": 18, "total_test_case_executions_count": 36, "total_test_cycles": 3, "avg_execution_time_sec": 18.6 }, "domain_breakdown": [], "test_cycle_breakdown": [], "failure_categorization": [], "cycle_comparison": [], "ai_summary": "Synthetic release report for October Platform Release." } },
+    "get-nexus-cycle-executions": { "statusCode": 200, "data": { "test_cycle_executions": [{ "test_cycle_id": "NX-CY-301", "test_cycle_name": "Retail Insights Daily QA", "status": "Success", "time_stamp": "2026-10-24T08:30:00Z", "user_id": "local.explorer@ilink.demo", "total_test_case_count": 4, "total_pass_count": 4 }] } },
+    "nexus-lite-execution": { "statusCode": 200, "data": { "message": "Demo execution completed.", "test_cycle_id": "NX-CY-301" } },
+    "falcon-lite-nexus-bulk-upload": { "statusCode": 200, "data": { "created_count": 1, "failed_count": 0 } },
+    "get-test-cycle-log-info": { "statusCode": 200, "body": [] },
+    "get-and-create-jaas-folder": { "statusCode": 200, "message": "Demo folder is ready." },
+    "mdt-push-test-case-to-jass": { "statusCode": 200, "message": "Demo case linked to Jaas." },
+    "mdt-get-and-create-jass-folder": { "statusCode": 200, "message": "Demo folder is ready." }
+  },
+  "metadata": {
+    "demo": true,
+    "notice": "Synthetic demonstration records. Changes are held in browser memory and reset on refresh."
+  }
+}

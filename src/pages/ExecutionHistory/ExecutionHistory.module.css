@@ -1,0 +1,69 @@
+.status {
+  color: white;
+  border-radius: 43px;
+  padding: 4px 1px !important;
+  font-weight: 700;
+  font-size: 12px !important;
+  width: 113px;
+  line-height: 0;
+  margin: auto;
+  text-align: center;
+}
+
+.paginationContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+}
+
+.btn {
+  background: #0ea5e9 !important;
+  color: white;
+  border: 0;
+  font-size: 14px;
+  border-radius: 5px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.btn:hover {
+  background-color: #3a9a0a !important;
+}
+
+.testcycle-header {
+  text-align: center;
+  word-break: break-word;
+}
+
+.details {
+  padding: 0;
+  border-radius: 0 0 8px 8px;
+}
+
+.table-container {
+  width: 99.9% !important;
+  margin: 0 auto !important;
+}
+
+.testsuite-Header {
+  background-color: #171717;
+  margin: 0 !important;
+  padding-bottom: 15px;
+}
+
+.testsuite-headercontent {
+  color: white !important;
+  text-align: center !important;
+}
+
+.bg-light-green {
+  background-color: #f6fff2;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.header {
+  background-color: #d8d8d8 !important;
+}

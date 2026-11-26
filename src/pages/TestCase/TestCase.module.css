@@ -1,0 +1,32 @@
+.btn {
+  background: #0ea5e9 !important;
+  color: white !important;
+} 
+
+.btn:hover {
+  background-color: #0ea5e9 !important;
+  cursor: pointer !important;
+}
+
+.paper {
+  background: rgb(245, 245, 245) !important;
+  padding: 10px 0px 20px 0px !important;
+  margin-top: 20px !important;
+  margin-bottom: 50px !important;
+  width: 90%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.accordion {
+  background: rgb(50, 50, 50) !important;
+  color: white !important;
+  height: 40px !important;
+  min-height: 0 !important;
+}
+
+.formControl {
+  width: 100%;
+  text-align: left;
+  margin-bottom: 20px !important;
+}

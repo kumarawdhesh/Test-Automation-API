@@ -1,0 +1,51 @@
+.root {
+  margin: 0px 15px 60px 15px;
+}
+
+.btn {
+  background: #0ea5e9 !important;
+}
+
+.btn:hover {
+  background-color: #0ea5e9 !important;
+}
+
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px !important;
+}
+
+.bg-light-green {
+  background-color: #f6fff2;
+}
+
+.bg-white {
+  background-color: #fff;
+}
+
+.rowCenter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%;
+}
+
+.data{
+  padding-left: 94px !important;
+}
+
+.datas{
+  padding-left: 85px !important;
+}
+
+.testSuite-header {
+  text-align: center;
+  word-break: break-word;
+}
+
+.details {
+  padding: 0;
+  border-radius: 0 0 8px 8px;
+}
