@@ -60,6 +60,43 @@ class DemoOperationsApiTests(TestCase):
                 self.assertIn(key, response.json()[envelope])
                 self.assertTrue(response.json()[envelope][key])
 
+    def test_seeded_connection_types_and_case_details(self):
+        connections = self.client.get(
+            "/api/guardian-connections/?operation=fetch_connection_names&appName=Falcon_Dev"
+        ).json()["connection_name"]
+        self.assertIn("MySQL", connections)
+        self.assertIn("SQL Server", connections)
+        self.assertTrue(connections["PostgreSQL"][0]["connectionId"])
+
+        suite = self.post_action("get-suite-cases").json()["body"]["data"][0]
+        case = suite["test_cases"][0]
+        self.assertEqual(case["test_config"]["source_connection"]["type"], "PostgreSQL")
+        self.assertEqual(case["test_config"]["source_connection"]["name"], "Orders Demo DB")
+        self.assertEqual(case["test_config"]["target_connection"]["type"], "Snowflake")
+        self.assertEqual(case["test_config"]["target_connection"]["name"], "Analytics Demo Warehouse")
+
+    def test_data_testing_metadata_and_sql_generation(self):
+        schemas = self.post_action("mdt-get-all-schema-tables").json()["body"]
+        self.assertTrue(schemas[0]["tables"])
+
+        metadata = self.post_action(
+            "mdt-get-schema-tables-columns-details",
+            source_details=[{"schema": "PUBLIC", "table": "ORDERS"}],
+            target_details=[{"schema": "PUBLIC", "table": "ORDERS"}],
+        ).json()["body"]
+        self.assertIn("ORDER_TOTAL", metadata["columns"]["source_tables"]["ORDERS"])
+        self.assertTrue(metadata["data_test_scenarios"]["data_test_scenarios"])
+
+        generated = self.post_action(
+            "mdt-data-testing-sql-generation",
+            source_details=[{"schema": "PUBLIC", "table": "ORDERS"}],
+            target_details=[{"schema": "PUBLIC", "table": "ORDERS"}],
+            test_scenarios=["Row count matches"],
+        ).json()["body"]["sql_queries"]
+        self.assertEqual(len(generated), 1)
+        self.assertIn("PUBLIC.ORDERS", generated[0]["source_sql"])
+        self.assertIn("PUBLIC.ORDERS", generated[0]["target_sql"])
+
     def test_ui_legacy_resource_urls(self):
         requests = [
             ("/api/test-release", "list-releases"),
@@ -147,3 +184,71 @@ class DemoOperationsApiTests(TestCase):
         self.assertEqual(test_case.status, "Pass")
         self.assertEqual(self.post_action("test-case-delete", test_case_id=test_case.id).status_code, 200)
         self.assertFalse(TestCaseModel.objects.filter(id=test_case.id).exists())
+
+    def test_ui_data_case_create_read_and_delete_round_trip(self):
+        response = self.post_action(
+            "test-case-create",
+            user_id="local.explorer@ilink.demo",
+            test_cases=[
+                {
+                    "testSuiteId": {
+                        "test_suite_name": "Created from UI",
+                        "test_suite_description": "End-to-end demo suite",
+                    },
+                    "testCaseName": "UI-created connection comparison",
+                    "testCaseDescription": "Compares source and target row counts.",
+                    "testType": "Data_Testing",
+                    "sourceConnection": "PostgreSQL",
+                    "sourceDB": "Orders Demo DB",
+                    "targetConnection": "Snowflake",
+                    "targetDB": "Analytics Demo Warehouse",
+                    "sourceSQL": "SELECT COUNT(*) FROM PUBLIC.ORDERS",
+                    "targetSQL": "SELECT COUNT(*) FROM PUBLIC.ORDERS",
+                    "keyColumns": ["ORDER_ID"],
+                    "testScenario": "Row count matches",
+                },
+                {
+                    "testSuiteId": {"test_suite_name": "Created from UI"},
+                    "testCaseName": "UI-created required fields check",
+                    "testType": "Data_Testing",
+                    "sourceConnection": "MySQL",
+                    "sourceDB": "Commerce MySQL Demo DB",
+                    "targetConnection": "SQL Server",
+                    "targetDB": "ERP SQL Server Demo DB",
+                    "sourceSQL": "SELECT COUNT(*) FROM PUBLIC.ORDERS",
+                    "targetSQL": "SELECT COUNT(*) FROM PUBLIC.ORDERS",
+                    "keyColumns": ["ORDER_ID"],
+                    "testScenario": "Required fields are populated",
+                },
+            ],
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["total_successfully_created_testcases"], 2)
+        self.assertEqual(response.json()["total_failed_testcases"], [])
+
+        created_id = response.json()["created_test_cases"][0]["test_case_id"]
+        suite = self.post_action("get-suite-cases", search_word="Created from UI").json()["body"]["data"][0]
+        cases = suite["test_cases"]
+        case = next(item for item in cases if item["test_case_id"] == created_id)
+        self.assertEqual(len(cases), 2)
+        self.assertEqual(case["test_config"]["test_case_type"], "Data_Testing")
+        self.assertEqual(case["test_config"]["source_connection"]["type"], "PostgreSQL")
+        self.assertEqual(case["test_config"]["source_connection"]["connection_id"], "demo-pg-orders")
+        self.assertEqual(case["test_config"]["target_connection"]["type"], "Snowflake")
+        self.assertEqual(
+            case["test_config"]["target_connection"]["connection_id"],
+            "demo-snowflake-analytics",
+        )
+        self.assertEqual(case["test_config"]["queries"]["source_sql"], "SELECT COUNT(*) FROM PUBLIC.ORDERS")
+        self.assertEqual(case["test_config"]["key_cols_override"], ["ORDER_ID"])
+        other_case = next(item for item in cases if item["test_case_id"] != created_id)
+        self.assertEqual(other_case["test_config"]["source_connection"]["type"], "MySQL")
+        self.assertEqual(other_case["test_config"]["target_connection"]["type"], "SQL Server")
+
+        for item in cases:
+            delete = self.post_action("test-case-delete", test_case_id=item["test_case_id"])
+            self.assertEqual(delete.status_code, 200)
+        self.assertEqual(
+            self.post_action("get-suite-cases", search_word="Created from UI").json()["body"]["data"][0]["test_cases"],
+            [],
+        )

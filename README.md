@@ -22,7 +22,7 @@ npm test -- --runInBand src/components/Footer/Footer.test.js
 
 ## Demo data
 
-The fixture contains example domains and applications, dashboard metrics, test suites and cases, releases and cycles, schedules, database connections, schemas, and table columns. All records are synthetic and intended only for UI demonstrations.
+The fixture contains example domains and applications, dashboard metrics, test suites and cases, releases and cycles, schedules, and source/target connections for PostgreSQL, Snowflake, Oracle, MySQL, and SQL Server. All records are synthetic and intended only for UI demonstrations. Django returns schema and column metadata, generated SQL, and persists cases created through the UI; SQL validation and execution are simulated and do not connect to external databases.
 
 ## Django REST API
 

@@ -1,4 +1,6 @@
 from copy import deepcopy
+import json
+import re
 
 from django.db import transaction
 from django.utils import timezone
@@ -43,7 +45,7 @@ def application_list():
 
 
 def case_payload(test_case):
-    payload = deepcopy(test_case.payload)
+    payload = complete_case_payload(test_case.payload)
     payload.update(
         {
             "test_case_id": test_case.id,
@@ -75,6 +77,10 @@ def suite_payload(suite):
 
 def cycle_payload(cycle):
     payload = deepcopy(cycle.payload)
+    payload["test_cases"] = [
+        complete_case_payload(test_case)
+        for test_case in payload.get("test_cases", [])
+    ]
     payload.update(
         {
             "test_cycle_id": cycle.id,
@@ -103,6 +109,211 @@ def release_payload(release):
     return payload
 
 
+def demo_connection_registry():
+    document = FixtureDocument.objects.filter(key="connections").first()
+    registry = {}
+    if not document:
+        return registry
+    for connection_type, connections in document.payload.items():
+        for connection in connections:
+            name = connection.get("connectionName") or connection.get("connection_name")
+            if name:
+                registry[name.casefold()] = {
+                    "type": connection_type,
+                    "name": name,
+                    "connection_id": connection.get("connectionId") or connection.get("connection_id", ""),
+                }
+    return registry
+
+
+def connection_payload(value, fallback_type="", fallback_name=""):
+    value = deepcopy(value) if isinstance(value, dict) else {}
+    name = value.get("name") or value.get("connection_name") or fallback_name
+    fixture = demo_connection_registry().get(str(name).casefold(), {}) if name else {}
+    connection_type = (
+        value.get("type")
+        or value.get("connection_type")
+        or fixture.get("type")
+        or fallback_type
+    )
+    connection_id = (
+        value.get("connection_id")
+        or value.get("connectionId")
+        or fixture.get("connection_id", "")
+    )
+    return {
+        **value,
+        "type": connection_type,
+        "name": name or "",
+        "connection_id": connection_id,
+    }
+
+
+def complete_case_payload(payload):
+    payload = deepcopy(payload)
+    test_config = payload.get("test_config")
+    if not isinstance(test_config, dict):
+        return payload
+    engine = test_config.get("execution_engine") or payload.get("execution_engine", "")
+    source = test_config.get("source_connection")
+    target = test_config.get("target_connection")
+    if source:
+        test_config["source_connection"] = connection_payload(
+            source, engine, payload.get("source_db", "")
+        )
+    if target:
+        test_config["target_connection"] = connection_payload(
+            target, engine, payload.get("target_db", "")
+        )
+    payload["test_config"] = test_config
+    return payload
+
+
+def next_id(prefix, model):
+    index = model.objects.count() + 1
+    candidate = "{}-{}".format(prefix, index)
+    while model.objects.filter(id=candidate).exists():
+        index += 1
+        candidate = "{}-{}".format(prefix, index)
+    return candidate
+
+
+def resolve_suite(test_case):
+    suite_ref = test_case.get("testSuiteId")
+    suite_id = test_case.get("test_suite_id")
+    suite_name = test_case.get("test_suite_name")
+    suite_description = test_case.get("test_suite_description", "")
+    if isinstance(suite_ref, dict):
+        suite_id = suite_ref.get("id") or suite_ref.get("test_suite_id") or suite_id
+        suite_name = (
+            suite_ref.get("test_suite_name")
+            or suite_ref.get("name")
+            or suite_name
+        )
+        suite_description = (
+            suite_ref.get("test_suite_description")
+            or suite_ref.get("description")
+            or suite_description
+        )
+    elif suite_ref not in (None, ""):
+        suite_id = suite_ref
+
+    suite = TestSuite.objects.filter(id=str(suite_id)).first() if suite_id else None
+    if not suite and suite_name:
+        suite = TestSuite.objects.filter(name=suite_name).first()
+    if suite or not suite_name:
+        return suite
+    return TestSuite.objects.create(
+        id=next_id("TS-DEMO", TestSuite),
+        name=suite_name,
+        description=suite_description,
+        modified_by="Local Explorer",
+    )
+
+
+def build_test_case_payload(item, action, suite, user_id=""):
+    item = deepcopy(item)
+    original_config = item.get("test_config") if isinstance(item.get("test_config"), dict) else {}
+    test_case_type = (
+        item.get("testType")
+        or item.get("test_case_type")
+        or item.get("test_type")
+        or original_config.get("test_case_type")
+        or ("NLQ_Testing" if action in ("mdt-create-iris-testcase", "create-nexus-testcase") else "Data_Testing")
+    )
+    engine = (
+        "Iris" if action == "mdt-create-iris-testcase"
+        else "Nexus" if action == "create-nexus-testcase"
+        else item.get("execution_engine") or original_config.get("execution_engine")
+    )
+    source_connection = connection_payload(
+        original_config.get("source_connection") or item.get("source_connection") or {},
+        item.get("sourceConnection") or item.get("source_connection_type") or engine or "",
+        item.get("sourceDB")
+        or item.get("source_db")
+        or item.get("connection_name")
+        or "",
+    )
+    target_connection = connection_payload(
+        original_config.get("target_connection") or item.get("target_connection") or {},
+        item.get("targetConnection") or item.get("target_connection_type") or "",
+        item.get("targetDB") or item.get("target_db") or "",
+    )
+    if test_case_type == "NLQ_Testing" and not target_connection["name"]:
+        target_connection = deepcopy(source_connection)
+
+    source_sql = (
+        item.get("sourceSQL")
+        or item.get("source_sql")
+        or original_config.get("queries", {}).get("source_sql")
+        or ""
+    )
+    target_sql = (
+        item.get("targetSQL")
+        or item.get("target_sql")
+        or item.get("Expected_SQL")
+        or item.get("Nexus_Expected_SQL")
+        or original_config.get("queries", {}).get("target_sql")
+        or ""
+    )
+    if action == "mdt-create-iris-testcase":
+        source_sql = json.dumps(
+            {
+                "question": item.get("Question_to_IRIS", ""),
+                "data_domain": item.get("domain", ""),
+                "iteration": item.get("iteration"),
+                "iris_version": item.get("iris_version", ""),
+                "test_type": item.get("test_type", []),
+            }
+        )
+    elif action == "create-nexus-testcase":
+        source_sql = json.dumps(
+            {
+                "question": item.get("Question_to_Nexus", ""),
+                "workspace_id": item.get("workspace_id", ""),
+                "workspace_name": item.get("workspace_name", ""),
+                "workpsace_domain_name": item.get("workpsace_domain_name", ""),
+                "created_by": item.get("workpsace_created_by", ""),
+                "test_type": item.get("test_type", []),
+                "connection_id": item.get("connection_id", ""),
+                "connection_name": item.get("connection_name", ""),
+            }
+        )
+
+    test_config = {
+        **original_config,
+        "test_case_type": test_case_type,
+        "execution_engine": engine or source_connection["type"],
+        "source_connection": source_connection,
+        "target_connection": target_connection,
+        "queries": {
+            **original_config.get("queries", {}),
+            "source_sql": source_sql,
+            "target_sql": target_sql,
+        },
+        "key_cols_override": item.get("keyColumns") or item.get("key_cols") or original_config.get("key_cols_override", ""),
+        "test_scenario": item.get("testScenario") or item.get("test_scenario") or original_config.get("test_scenario", ""),
+        "tc_config_id": original_config.get("tc_config_id", ""),
+    }
+    item.update(
+        {
+            "test_case_name": item.get("testCaseName") or item.get("test_case_name") or "New Demo Test Case",
+            "test_case_desc": item.get("testCaseDescription") or item.get("test_case_desc") or "",
+            "test_case_type": test_case_type,
+            "test_type": test_case_type,
+            "test_suite_id": suite.id if suite else "",
+            "test_suite_name": suite.name if suite else "",
+            "execution_engine": test_config["execution_engine"],
+            "source_sql": source_sql,
+            "target_sql": target_sql,
+            "status": "Not Executed",
+            "test_config": test_config,
+            "_created_by": user_id,
+        }
+    )
+    return complete_case_payload(item)
+
+
 def operation_result(action, body):
     if action in ("mdt-get-user-access-info", "get-user-access-info"):
         return wrapped({"organizations": application_list()})
@@ -110,6 +321,65 @@ def operation_result(action, body):
     if action == "get_dashboard_stats":
         document = FixtureDocument.objects.filter(key="dashboard").first()
         return deepcopy(document.payload) if document else None
+
+    if action == "mdt-get-all-schema-tables":
+        document = FixtureDocument.objects.filter(key="schemas").first()
+        return wrapped(deepcopy(document.payload) if document else [])
+
+    if action == "mdt-get-schema-tables-columns-details":
+        columns = FixtureDocument.objects.filter(key="columns").first()
+        scenarios = FixtureDocument.objects.filter(key="scenarios").first()
+        return wrapped(
+            {
+                "columns": deepcopy(columns.payload) if columns else {"source_tables": {}, "target_tables": {}},
+                "mappings": {
+                    "default_mappings": [
+                        {
+                            "sourceTable": "ORDERS",
+                            "sourceColumn": "ORDER_TOTAL",
+                            "targetTable": "ORDERS",
+                            "targetColumn": "TOTAL_AMOUNT",
+                            "transformation": [],
+                        }
+                    ],
+                    "llm_mappings": [],
+                    "variant_mappings": [],
+                },
+                "data_test_scenarios": {
+                    "data_test_scenarios": deepcopy(scenarios.payload) if scenarios else []
+                },
+                "llm_scenarios": [],
+            }
+        )
+
+    if action == "mdt-data-testing-sql-generation":
+        def table_reference(details, fallback):
+            selected = details[0] if isinstance(details, list) and details else {}
+            if isinstance(selected, str):
+                selected = {"table": selected}
+            table = selected.get("table") or selected.get("name") or fallback
+            schema = selected.get("schema") or "PUBLIC"
+            safe_identifier = re.compile(r"^[A-Za-z_][A-Za-z0-9_$]*$")
+            if not safe_identifier.match(str(schema)) or not safe_identifier.match(str(table)):
+                return fallback
+            return "{}.{}".format(schema, table)
+
+        source_table = table_reference(body.get("source_details"), "PUBLIC.ORDERS")
+        target_table = table_reference(body.get("target_details"), "PUBLIC.ORDERS")
+        scenarios = body.get("test_scenarios") or ["Row count matches"]
+        queries = [
+            {
+                "test_scenario": scenario,
+                "source_sql": "SELECT COUNT(*) AS row_count FROM {}".format(source_table),
+                "target_sql": "SELECT COUNT(*) AS row_count FROM {}".format(target_table),
+                "status": "Generated",
+            }
+            for scenario in scenarios
+        ]
+        return wrapped({"sql_queries": queries})
+
+    if action == "mdt-validate-sql":
+        return fixture_response(action) or {"status": 200, "statusCode": 200, "message": "Demo SQL validation passed."}
 
     if action in ("get-suite-cases", "get-test-suites"):
         suites = list(TestSuite.objects.all().order_by("id"))
@@ -293,21 +563,41 @@ def operation_result(action, body):
         return {"statusCode": 200, "message": "Test cycle updated."}
 
     if action in ("test-case-create", "mdt-create-iris-testcase", "create-nexus-testcase"):
-        response_fixture = fixture_response(action)
-        case_id = body.get("test_case_id") or "TC-DEMO-{}".format(TestCase.objects.count() + 1)
-        suite = TestSuite.objects.filter(id=body.get("test_suite_id")).first()
-        case_name = body.get("test_case_name") or body.get("testCaseName") or "New Demo Test Case"
-        TestCase.objects.update_or_create(
-            id=case_id,
-            defaults={
-                "suite": suite,
-                "name": case_name,
-                "test_type": body.get("test_type", ""),
-                "status": "Not Executed",
-                "payload": body,
-            },
-        )
-        return response_fixture or wrapped("Test case {} created.".format(case_id))
+        test_cases = body.get("test_cases")
+        if not isinstance(test_cases, list):
+            test_cases = [body]
+        created = []
+        failed = []
+        for test_case in test_cases:
+            name = test_case.get("testCaseName") or test_case.get("test_case_name")
+            if not name:
+                failed.append({"test_case_name": "", "error": "Test case name is required."})
+                continue
+            suite = resolve_suite(test_case)
+            case_id = test_case.get("test_case_id") or next_id("TC-DEMO", TestCase)
+            if TestCase.objects.filter(id=case_id).exists():
+                failed.append({"test_case_name": name, "error": "Test case ID already exists."})
+                continue
+            payload = build_test_case_payload(test_case, action, suite, body.get("user_id", ""))
+            case = TestCase.objects.create(
+                id=case_id,
+                suite=suite,
+                name=payload["test_case_name"],
+                test_type=payload["test_type"],
+                status="Not Executed",
+                payload=payload,
+            )
+            created.append(case)
+        return {
+            "statusCode": 200,
+            "message": "{} test case(s) created.".format(len(created)),
+            "total_successfully_created_testcases": len(created),
+            "total_failed_testcases": failed,
+            "created_test_cases": [
+                {"test_case_id": case.id, "test_case_name": case.name}
+                for case in created
+            ],
+        }
 
     if action in ("test-case-modify", "mdt-modify-iris-testcase", "modify-nexus-testcase"):
         case = TestCase.objects.filter(id=body.get("test_case_id")).first()

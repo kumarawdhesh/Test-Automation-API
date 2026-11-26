@@ -88,17 +88,29 @@
     { "test_cycle_id": "CY-5410", "test_cycle_result_id": "RUN-CY-5410", "test_cycle_name": "September Full Regression", "release_id": "REL-26.09", "status": "Success", "time_stamp": "2026-09-28T13:05:00Z", "user_id": "morgan.lee@ilink.demo", "start_ts": "2026-09-28T12:15:00Z", "end_ts": "2026-09-28T13:05:00Z", "total_test_case_count": 3, "total_pass_count": 3, "test_cases": [] }
   ],
   "connections": {
-    "PostgreSQL": [{ "connectionId": "demo-pg-orders", "connectionName": "Orders Demo DB" }],
-    "Snowflake": [{ "connection_id": "demo-snowflake-analytics", "connection_name": "Analytics Demo Warehouse", "connectionName": "Analytics Demo Warehouse" }],
-    "Oracle": [{ "connectionId": "demo-oracle-legacy", "connectionName": "Legacy Demo DB" }]
+    "PostgreSQL": [{ "connectionId": "demo-pg-orders", "connectionName": "Orders Demo DB" }, { "connectionId": "demo-pg-inventory", "connectionName": "Inventory PostgreSQL Demo DB" }],
+    "Snowflake": [{ "connection_id": "demo-snowflake-analytics", "connection_name": "Analytics Demo Warehouse", "connectionName": "Analytics Demo Warehouse" }, { "connection_id": "demo-snowflake-customer", "connection_name": "Customer Snowflake Demo", "connectionName": "Customer Snowflake Demo" }],
+    "Oracle": [{ "connectionId": "demo-oracle-legacy", "connectionName": "Legacy Demo DB" }],
+    "MySQL": [{ "connectionId": "demo-mysql-commerce", "connectionName": "Commerce MySQL Demo DB" }],
+    "SQL Server": [{ "connectionId": "demo-sqlserver-erp", "connectionName": "ERP SQL Server Demo DB" }]
   },
   "schemas": [
     { "schema": "PUBLIC", "tables": [{ "name": "ORDERS" }, { "name": "CUSTOMERS" }, { "name": "PAYMENTS" }] },
     { "schema": "WAREHOUSE", "tables": [{ "name": "INVENTORY" }, { "name": "SHIPMENTS" }] }
   ],
   "columns": {
-    "source_tables": { "ORDERS": { "ORDER_ID": "NUMBER", "CUSTOMER_ID": "NUMBER", "ORDER_TOTAL": "DECIMAL", "ORDER_STATUS": "VARCHAR" } },
-    "target_tables": { "ORDERS": { "ORDER_ID": "INTEGER", "CUSTOMER_ID": "INTEGER", "TOTAL_AMOUNT": "DECIMAL", "STATUS": "VARCHAR" } }
+    "source_tables": {
+      "ORDERS": { "ORDER_ID": "NUMBER", "CUSTOMER_ID": "NUMBER", "ORDER_TOTAL": "DECIMAL", "ORDER_STATUS": "VARCHAR" },
+      "CUSTOMERS": { "CUSTOMER_ID": "NUMBER", "CUSTOMER_NAME": "VARCHAR", "EMAIL": "VARCHAR" },
+      "PAYMENTS": { "PAYMENT_ID": "NUMBER", "ORDER_ID": "NUMBER", "PAYMENT_STATUS": "VARCHAR" },
+      "INVENTORY": { "SKU": "VARCHAR", "AVAILABLE_QTY": "NUMBER", "UPDATED_AT": "TIMESTAMP" }
+    },
+    "target_tables": {
+      "ORDERS": { "ORDER_ID": "INTEGER", "CUSTOMER_ID": "INTEGER", "TOTAL_AMOUNT": "DECIMAL", "STATUS": "VARCHAR" },
+      "CUSTOMERS": { "CUSTOMER_ID": "INTEGER", "CUSTOMER_NAME": "VARCHAR", "EMAIL_ADDRESS": "VARCHAR" },
+      "PAYMENTS": { "PAYMENT_ID": "INTEGER", "ORDER_ID": "INTEGER", "STATUS": "VARCHAR" },
+      "INVENTORY": { "SKU": "VARCHAR", "AVAILABLE_QUANTITY": "INTEGER", "UPDATED_AT": "TIMESTAMP" }
+    }
   },
   "scenarios": [
     { "scenario_name": "Row count matches", "category": "data_validation" },
@@ -166,7 +178,7 @@
     "get-nexus-domains": { "statusCode": 200, "body": [{ "domain_name": "Analytics Demo", "workspace_name": "Retail Insights", "workspace_id": "WS-301" }] },
     "get-nexus-test-cases": { "statusCode": 200, "body": { "data": [] } },
     "mdt-get-all-schema-tables": { "statusCode": 200, "body": [] },
-    "mdt-get-schema-tables-columns-details": { "statusCode": 200, "body": { "columns": { "source_tables": {}, "target_tables": {} }, "mappings": { "default_mappings": [], "llm_mappings": [], "variant_mappings": [] } } },
+    "mdt-get-schema-tables-columns-details": { "statusCode": 200, "body": { "columns": { "source_tables": {}, "target_tables": {} }, "mappings": { "default_mappings": [], "llm_mappings": [], "variant_mappings": [] }, "data_test_scenarios": { "data_test_scenarios": [] }, "llm_scenarios": [] } },
     "mdt-data-testing-sql-generation": { "statusCode": 200, "body": { "sql_queries": [] } },
     "get-test-case-executions": { "statusCode": 200, "data": { "test_cases": [] } },
     "get-test-execution-logs": { "statusCode": 200, "body": "{\"data\": []}" },
