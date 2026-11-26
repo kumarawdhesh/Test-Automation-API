@@ -11,6 +11,7 @@ from rest_framework.views import APIView
 
 from .models import (
     Application,
+    Connection,
     FixtureDocument,
     FixtureResponse,
     Organization,
@@ -123,7 +124,36 @@ def demo_connection_registry():
                     "name": name,
                     "connection_id": connection.get("connectionId") or connection.get("connection_id", ""),
                 }
+    for connection in Connection.objects.filter(is_active=True).select_related("connection_type"):
+        registry[connection.name.casefold()] = {
+            "type": connection.connection_type.name,
+            "name": connection.name,
+            "connection_id": str(connection.connection_id),
+        }
     return registry
+
+
+def connection_names(app_name=""):
+    document = FixtureDocument.objects.filter(key="connections").first()
+    result = deepcopy(document.payload) if document else {}
+    connections = Connection.objects.filter(is_active=True).select_related("connection_type")
+    if app_name:
+        connections = connections.filter(app_name=app_name)
+    for connection in connections:
+        result.setdefault(connection.connection_type.name, [])
+        result[connection.connection_type.name] = [
+            item
+            for item in result[connection.connection_type.name]
+            if (item.get("connectionName") or item.get("connection_name", "")).casefold()
+            != connection.name.casefold()
+        ]
+        result[connection.connection_type.name].append(
+            {
+                "connectionId": str(connection.connection_id),
+                "connectionName": connection.name,
+            }
+        )
+    return result
 
 
 def connection_payload(value, fallback_type="", fallback_name=""):
@@ -472,8 +502,10 @@ def operation_result(action, body):
         return wrapped([deepcopy(item.payload) for item in Schedule.objects.all().order_by("id")])
 
     if action == "guardian-connections":
-        document = FixtureDocument.objects.filter(key="connections").first()
-        return {"statusCode": 200, "connection_name": deepcopy(document.payload) if document else {}}
+        return {
+            "statusCode": 200,
+            "connection_name": connection_names(body.get("appName", "")),
+        }
 
     if action == "get-test-case-executions":
         result_id = body.get("test_cycle_result_id")
@@ -700,6 +732,8 @@ class OperationView(APIView):
     @transaction.atomic
     def handle(self, request, resource):
         body = request.data if isinstance(request.data, dict) else {}
+        if resource.strip("/") == "guardian-connections" and request.query_params.get("appName"):
+            body = {**body, "appName": request.query_params["appName"]}
         action = body.get("function_name") or request.query_params.get("function_name")
         if not action and resource in ("operations", ""):
             return Response(

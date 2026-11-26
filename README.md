@@ -33,8 +33,19 @@ python -m venv backend\.venv
 backend\.venv\Scripts\python -m pip install -r backend\requirements.txt
 backend\.venv\Scripts\python backend\manage.py migrate
 backend\.venv\Scripts\python backend\manage.py seed_demo
+backend\.venv\Scripts\python backend\manage.py createsuperuser
 backend\.venv\Scripts\python backend\manage.py runserver 127.0.0.1:8000
 ```
+
+Open <http://127.0.0.1:8000/admin/> and sign in with that admin account. Add database types under **Connection types** first, then add connections under **Connections**. Each connection gets an ID automatically and can be enabled or disabled; active connections are included in the UI's connection list. Demo connection records remain available from the fixture.
+
+The admin also exposes every model mapped from `create_ddl_snowflake_unistore.sql` under **Schema api** for add, view, edit, and delete operations. Models with related records prevent deletion until those references are removed.
+
+### UniStore DDL data API
+
+The DDL-backed models use SQLite locally and are exposed as standard JSON CRUD resources under `/api/v1/`; the existing UI-compatible `/api/` operations are unchanged. Each resource supports `GET` list/detail, `POST` create, `PUT`/`PATCH` update, and `DELETE`. Foreign keys use related model IDs, `VARIANT` columns use JSON, and deletion of referenced records returns HTTP 409. Credential fields such as refresh tokens and result password hashes are write-only in the API.
+
+Resources: `app-users`, `bucket-names`, `environments`, `iris-responses`, `test-objects`, `test-object-configs`, `test-case-configs`, `test-suites`, `test-cases`, `test-cycles`, `releases`, `release-test-cycle-mappings`, `test-cycle-case-mappings`, `schedules`, `test-data-generation-audits`, `test-cycle-results`, `test-case-results`, `test-case-result-history`, `test-cycle-result-history`, `multi-steps`, and `multi-step-results`. The browsable API root is <http://127.0.0.1:8000/api/v1/>.
 
 In another PowerShell window, run the UI against Django. The checked-in `.env` and `.env.dev` already configure this; the explicit settings below are useful when overriding them:
 

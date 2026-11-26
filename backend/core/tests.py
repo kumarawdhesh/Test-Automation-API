@@ -1,11 +1,12 @@
 import json
 from pathlib import Path
 
+from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .models import Release, TestCase as TestCaseModel, TestCycle, TestSuite
+from .models import Connection, ConnectionType, Release, TestCase as TestCaseModel, TestCycle, TestSuite
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -134,6 +135,48 @@ class DemoOperationsApiTests(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("PostgreSQL", response.json()["connection_name"])
+
+    def test_admin_managed_connections_are_available_to_the_ui(self):
+        connection_type = ConnectionType.objects.create(name="Demo Warehouse")
+        connection = Connection.objects.create(
+            name="Admin-added warehouse",
+            connection_type=connection_type,
+        )
+        Connection.objects.create(
+            name="Disabled warehouse",
+            connection_type=connection_type,
+            is_active=False,
+        )
+        Connection.objects.create(
+            name="Other app warehouse",
+            connection_type=connection_type,
+            app_name="Other_App",
+        )
+
+        response = self.client.get(
+            "/api/guardian-connections/?operation=fetch_connection_names&appName=Falcon_Dev"
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            response.json()["connection_name"]["Demo Warehouse"],
+            [
+                {
+                    "connectionId": str(connection.connection_id),
+                    "connectionName": "Admin-added warehouse",
+                }
+            ],
+        )
+
+    def test_connection_models_are_available_in_django_admin(self):
+        self.assertEqual(self.client.get("/admin/").status_code, 302)
+        admin_user = get_user_model().objects.create_superuser(
+            username="connection-admin",
+            email="admin@example.com",
+            password="test-password",
+        )
+        self.client.force_login(admin_user)
+        self.assertEqual(self.client.get("/admin/core/connectiontype/add/").status_code, 200)
+        self.assertEqual(self.client.get("/admin/core/connection/add/").status_code, 200)
 
     def test_suite_create_update_and_delete(self):
         self.assertEqual(self.post_action("test-suite-create", test_suite_name="API suite").status_code, 200)

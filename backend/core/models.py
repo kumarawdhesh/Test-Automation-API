@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 
 
@@ -17,6 +19,39 @@ class Application(models.Model):
         constraints = [
             models.UniqueConstraint(fields=["organization", "name"], name="unique_application_per_organization")
         ]
+
+
+class ConnectionType(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class Connection(models.Model):
+    connection_id = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    name = models.CharField(max_length=200)
+    connection_type = models.ForeignKey(
+        ConnectionType, related_name="connections", on_delete=models.PROTECT
+    )
+    app_name = models.CharField(max_length=200, default="Falcon_Dev")
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ["connection_type__name", "name"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["connection_type", "name", "app_name"],
+                name="unique_connection_name_per_app_and_type",
+            )
+        ]
+
+    def __str__(self):
+        return "{} ({})".format(self.name, self.connection_type.name)
 
 
 class TestSuite(models.Model):
